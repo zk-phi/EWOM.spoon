@@ -54,20 +54,6 @@ obj.watchers[#obj.watchers + 1] = hs.application.watcher.new(
 ):start()
 
 --
--- lastKeyDown
---
-
-obj.lastKeyDown = nil
-
-obj.watchers[#obj.watchers + 1] = hs.eventtap.new(
-  { hs.eventtap.event.types.keyDown },
-  function (evt)
-    obj.lastKeyDown = evt:getCharacters(true)
-    return false
-  end
-):start()
-
---
 -- Keymap internals
 --
 
@@ -114,6 +100,20 @@ function obj:setFilter (filterFn)
     end
   )
 end
+
+--
+-- lastKeyDown
+--
+
+obj.lastKeyDown = nil
+
+obj.watchers[#obj.watchers + 1] = hs.eventtap.new(
+  { hs.eventtap.event.types.keyDown },
+  function (evt)
+    obj.lastKeyDown = evt:getCharacters(true)
+    return false
+  end
+):start()
 
 --
 -- Mark
