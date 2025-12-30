@@ -104,16 +104,17 @@ end
 
 obj.markActive = false
 
--- auto-disable mark on focus-out
-obj:addHook(
-  obj.afterFocusChangeHook,
-  function ()
-    if obj.markActive then
-      hs.alert("Mark disabled")
-    end
+local function maybeResetMark ()
+  if obj.markActive then
+    hs.alert("Mark disabled")
     obj.markActive = false
   end
-)
+end
+
+-- auto-disable mark on focus-out
+obj:addHook(obj.afterFocusChangeHook, maybeResetMark)
+-- auto-disable after change
+obj:addHook(obj.afterChangeHook, maybeResetMark)
 
 --
 -- Digit arguments
