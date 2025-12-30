@@ -72,17 +72,34 @@ obj.watchers[#obj.watchers + 1] = hs.eventtap.new(
 --
 
 obj.globalMap = hs.hotkey.modal.new()
+obj.temporaryMap = nil
 
 function obj:bindKey (map, mod, char, fn, repeated)
   map:bind(mod, char, fn, nil, repeated and fn or nil)
 end
 
+local function maybeExitTemporaryMap ()
+  if obj.temporaryMap then
+    obj.temporaryMap:exit()
+    obj.temporaryMap = nil
+    hs.alert("Prefix cleared")
+  end
+end
+
 local function disableAllBindings ()
+  maybeExitTemporaryMap()
   obj.globalMap:exit()
 end
 
-local function enableAllBindings ()
+local function enableGlobalMap ()
+  maybeExitTemporaryMap()
   obj.globalMap:enter()
+end
+
+local function enableTemporaryMap (map)
+  disableAllBindings()
+  map:enter()
+  obj.temporaryMap = map
 end
 
 function obj:setFilter (filterFn)
@@ -92,7 +109,7 @@ function obj:setFilter (filterFn)
       if filterFn(app) then
         disableAllBindings()
       else
-        enableAllBindings()
+        enableGlobalMap()
       end
     end
   )
@@ -115,6 +132,18 @@ end
 obj:addHook(obj.afterFocusChangeHook, maybeResetMark)
 -- auto-disable after change
 obj:addHook(obj.afterChangeHook, maybeResetMark)
+
+--
+-- cx
+--
+
+obj.cxMap = hs.hotkey.modal.new()
+obj:addHook(obj.preCommandHook, enableGlobalMap)
+
+function obj:cx ()
+  hs.alert("C-x")
+  enableTemporaryMap(obj.cxMap)
+end
 
 --
 -- Digit arguments
@@ -226,6 +255,12 @@ function obj:backwardWord ()
       sendKey({ 'option' }, 'left')
     end
   end
+  obj:runHooks(obj.postCommandHook)
+end
+
+function obj:saveBuffer ()
+  obj:runHooks(obj.preCommandHook)
+  sendKey({ 'cmd' }, 's')
   obj:runHooks(obj.postCommandHook)
 end
 
