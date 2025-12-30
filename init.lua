@@ -54,7 +54,21 @@ obj.watchers[#obj.watchers + 1] = hs.application.watcher.new(
 ):start()
 
 --
--- globalMap
+-- lastKeyDown
+--
+
+obj.lastKeyDown = nil
+
+obj.watchers[#obj.watchers + 1] = hs.eventtap.new(
+  { hs.eventtap.event.types.keyDown },
+  function (evt)
+    obj.lastKeyDown = evt:getCharacters(true)
+    return false
+  end
+):start()
+
+--
+-- Keymap internals
 --
 
 obj.globalMap = hs.hotkey.modal.new()
@@ -102,6 +116,27 @@ obj:addHook(
 )
 
 --
+-- Digit arguments
+--
+
+obj.digitArgumentValue = 0
+obj:addHook(
+  obj.postCommandHook,
+  function ()
+    if obj.digitArgumentValue > 0 then
+      hs.alert("Digit-argument cleared")
+    end
+    obj.digitArgumentValue = 0
+  end
+)
+
+function obj:digitArgument ()
+  local digit = tonumber(obj.lastKeyDown)
+  obj.digitArgumentValue = obj.digitArgumentValue * 10 + digit
+  hs.alert(obj.digitArgumentValue)
+end
+
+--
 -- Commands
 --
 
@@ -123,60 +158,72 @@ end
 
 function obj:backwardChar ()
   obj:runHooks(obj.preCommandHook)
-  if obj.markActive then
-    sendKey({ 'shift' }, 'left')
-  else
-    sendKey({}, 'left')
+  for i = 1, math.max(1, obj.digitArgumentValue) do
+    if obj.markActive then
+      sendKey({ 'shift' }, 'left')
+    else
+      sendKey({}, 'left')
+    end
   end
   obj:runHooks(obj.postCommandHook)
 end
 
 function obj:forwardChar ()
   obj:runHooks(obj.preCommandHook)
-  if obj.markActive then
-    sendKey({ 'shift' }, 'right')
-  else
-    sendKey({}, 'right')
+  for i = 1, math.max(1, obj.digitArgumentValue) do
+    if obj.markActive then
+      sendKey({ 'shift' }, 'right')
+    else
+      sendKey({}, 'right')
+    end
   end
   obj:runHooks(obj.postCommandHook)
 end
 
 function obj:previousLine ()
   obj:runHooks(obj.preCommandHook)
-  if obj.markActive then
-    sendKey({ 'shift' }, 'up')
-  else
-    sendKey({}, 'up')
+  for i = 1, math.max(1, obj.digitArgumentValue) do
+    if obj.markActive then
+      sendKey({ 'shift' }, 'up')
+    else
+      sendKey({}, 'up')
+    end
   end
   obj:runHooks(obj.postCommandHook)
 end
 
 function obj:nextLine ()
   obj:runHooks(obj.preCommandHook)
-  if obj.markActive then
-    sendKey({ 'shift' }, 'down')
-  else
-    sendKey({}, 'down')
+  for i = 1, math.max(1, obj.digitArgumentValue) do
+    if obj.markActive then
+      sendKey({ 'shift' }, 'down')
+    else
+      sendKey({}, 'down')
+    end
   end
   obj:runHooks(obj.postCommandHook)
 end
 
 function obj:forwardWord ()
   obj:runHooks(obj.preCommandHook)
-  if obj.markActive then
-    sendKey({ 'shift', 'option' }, 'right')
-  else
-    sendKey({ 'option' }, 'right')
+  for i = 1, math.max(1, obj.digitArgumentValue) do
+    if obj.markActive then
+      sendKey({ 'shift', 'option' }, 'right')
+    else
+      sendKey({ 'option' }, 'right')
+    end
   end
   obj:runHooks(obj.postCommandHook)
 end
 
 function obj:backwardWord ()
   obj:runHooks(obj.preCommandHook)
-  if obj.markActive then
-    sendKey({ 'shift', 'option' }, 'left')
-  else
-    sendKey({ 'option' }, 'left')
+  for i = 1, math.max(1, obj.digitArgumentValue) do
+    if obj.markActive then
+      sendKey({ 'shift', 'option' }, 'left')
+    else
+      sendKey({ 'option' }, 'left')
+    end
   end
   obj:runHooks(obj.postCommandHook)
 end
