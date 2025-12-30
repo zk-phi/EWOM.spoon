@@ -11,15 +11,17 @@ obj.license = "MIT"
 obj.homepage = "https://github.com/zk-phi/dotfiles"
 
 --
--- Helper fns
+-- Hooks
 --
 
--- Like fs.eventtap.keyStroke but faster
--- https://github.com/Hammerspoon/hammerspoon/issues/1082
-function myStrokeKey (mod, char)
-  hs.eventtap.event.newKeyEvent(mod, char, true):post()
-  hs.eventtap.event.newKeyEvent(mod, char, false):post()
-end
+obj.preCommandHook = {}
+obj.postCommandHook = {}
+obj.afterChangeHook = {}
+
+obj.beforeSendHook = {}
+obj.afterSendHook = {}
+
+obj.afterFocusChangeHook = {}
 
 function obj:addHook (hook, fn)
   hook[#hook + 1] = fn
@@ -31,15 +33,18 @@ function obj:runHooks (hook, arg)
   end
 end
 
---
--- afterFocusChangeHook
---
-
-obj.watchers = {}
-obj.afterFocusChangeHook = {}
+-- Like fs.eventtap.keyStroke but faster
+-- https://github.com/Hammerspoon/hammerspoon/issues/1082
+function sendKey (mod, char)
+  obj:runHooks(obj.beforeSendHook)
+  hs.eventtap.event.newKeyEvent(mod, char, true):post()
+  hs.eventtap.event.newKeyEvent(mod, char, false):post()
+  obj:runHooks(obj.afterSendHook)
+end
 
 -- We need to bind allocated watcher unless otherwise it will be garbage-collected.
 -- https://github.com/Hammerspoon/hammerspoon/issues/681#issuecomment-178420569
+obj.watchers = {}
 obj.watchers[#obj.watchers + 1] = hs.application.watcher.new(
   function (app, event)
     if event == hs.application.watcher.activated then
@@ -97,67 +102,83 @@ obj:addHook(
 )
 
 --
--- commands
+-- Commands
 --
 
 function obj:setMarkCommand ()
+  obj:runHooks(obj.preCommandHook)
   hs.alert("Mark enabled")
   obj.markActive = true
+  obj:runHooks(obj.postCommandHook)
 end
 
 function obj:keyboardQuit ()
+  obj:runHooks(obj.preCommandHook)
   if obj.markActive then
     hs.alert("Mark disabled")
     obj.markActive = false
   end
+  obj:runHooks(obj.postCommandHook)
 end
 
 function obj:backwardChar ()
+  obj:runHooks(obj.preCommandHook)
   if obj.markActive then
-    myStrokeKey({ 'shift' }, 'left')
+    sendKey({ 'shift' }, 'left')
   else
-    myStrokeKey({}, 'left')
+    sendKey({}, 'left')
   end
+  obj:runHooks(obj.postCommandHook)
 end
 
 function obj:forwardChar ()
+  obj:runHooks(obj.preCommandHook)
   if obj.markActive then
-    myStrokeKey({ 'shift' }, 'right')
+    sendKey({ 'shift' }, 'right')
   else
-    myStrokeKey({}, 'right')
+    sendKey({}, 'right')
   end
+  obj:runHooks(obj.postCommandHook)
 end
 
 function obj:previousLine ()
+  obj:runHooks(obj.preCommandHook)
   if obj.markActive then
-    myStrokeKey({ 'shift' }, 'up')
+    sendKey({ 'shift' }, 'up')
   else
-    myStrokeKey({}, 'up')
+    sendKey({}, 'up')
   end
+  obj:runHooks(obj.postCommandHook)
 end
 
 function obj:nextLine ()
+  obj:runHooks(obj.preCommandHook)
   if obj.markActive then
-    myStrokeKey({ 'shift' }, 'down')
+    sendKey({ 'shift' }, 'down')
   else
-    myStrokeKey({}, 'down')
+    sendKey({}, 'down')
   end
+  obj:runHooks(obj.postCommandHook)
 end
 
 function obj:forwardWord ()
+  obj:runHooks(obj.preCommandHook)
   if obj.markActive then
-    myStrokeKey({ 'shift', 'option' }, 'right')
+    sendKey({ 'shift', 'option' }, 'right')
   else
-    myStrokeKey({ 'option' }, 'right')
+    sendKey({ 'option' }, 'right')
   end
+  obj:runHooks(obj.postCommandHook)
 end
 
 function obj:backwardWord ()
+  obj:runHooks(obj.preCommandHook)
   if obj.markActive then
-    myStrokeKey({ 'shift', 'option' }, 'left')
+    sendKey({ 'shift', 'option' }, 'left')
   else
-    myStrokeKey({ 'option' }, 'left')
+    sendKey({ 'option' }, 'left')
   end
+  obj:runHooks(obj.postCommandHook)
 end
 
 return obj
