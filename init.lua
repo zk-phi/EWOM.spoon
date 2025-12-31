@@ -298,11 +298,14 @@ function obj.cmd.keyboardQuit (arg)
   if (not obj.markActive) and (not obj.overlayMap) and arg == 0 then
     -- nothing to clear => just send ESC
     obj.sendKey({}, 'esc')
-  elseif obj.markActive then
+    return
+  end
+  -- otherwise avoid sending ESC
+  -- note that `overlayMap` and `arg` will be cleared automatically
+  if obj.markActive then
     hs.alert('Mark disabled')
     obj.markActive = false
   end
-  -- overlayMap and arg will be cleared automatically
 end
 
 function obj.cmd.selfInsertCommand (arg, key)
