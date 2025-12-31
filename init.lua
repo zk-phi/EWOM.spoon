@@ -69,10 +69,17 @@ end
 
 obj.beforeSendHook = {}
 
+-- hs.hotkey can be fired with synthetic keyboard event too,
+-- which easily leads to infinite recursion. so implement we hotkeys by our own.
+-- https://github.com/Hammerspoon/hammerspoon/issues/1230
+
 local SYNTHETIC_EVENT_SIGNATURE = 55555
 
 local function sendSyntheticEvent (evt, delay)
-  evt:setProperty(hs.eventtap.event.properties.eventSourceUserData, SYNTHETIC_EVENT_SIGNATURE)
+  evt:setProperty(
+    hs.eventtap.event.properties.eventSourceUserData,
+    SYNTHETIC_EVENT_SIGNATURE
+  )
   obj.runHooks(obj.beforeSendHook, evt)
   if delay and delay > 0 then
     hs.timer.delayed.new(delay, function () evt:post() end):start()
@@ -97,10 +104,6 @@ end
 -- Keymap lookup
 --
 
--- hs.hotkey can be fired with synthetic keyboard event too,
--- which easily leads to infinite recursion. so implement by our own
--- https://github.com/Hammerspoon/hammerspoon/issues/1230
-
 obj.globalMap = {}
 obj.overlayMap = nil
 
@@ -116,12 +119,12 @@ local MODFLAGS =
 
 function obj.defineKey (map, mods, char, fn, repeatable)
   local e = hs.eventtap.event.newKeyEvent(mods, char, true)
-  local code = e:getKeyCode()
   local flags = e:rawFlags() & MODFLAGS
-  if not map[code] then
-    map[code] = {}
+  local code = e:getKeyCode()
+  if not map[flags] then
+    map[flags] = {}
   end
-  map[code][flags] = { fn, repeatable }
+  map[flags][code] = { fn, repeatable }
 end
 
 local function maybeDisableOverlayMap (silent)
@@ -139,8 +142,8 @@ function obj.enableOverlayMap (map)
 end
 
 local function lookupKey (map, evt)
-  local flagsMap = map and map[evt:getKeyCode()]
-  return flagsMap and flagsMap[evt:rawFlags() & MODFLAGS]
+  local codeMap = map and map[evt:rawFlags() & MODFLAGS]
+  return codeMap and codeMap[evt:getKeyCode()]
 end
 
 local function lookupKeyDwim (evt)
