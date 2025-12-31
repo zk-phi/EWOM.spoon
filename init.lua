@@ -165,7 +165,13 @@ obj.addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
 -- the event loop
 
 obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
-  {hs.eventtap.event.types.keyDown},
+  {
+    hs.eventtap.event.types.keyDown,
+    hs.eventtap.event.types.leftMouseDown,
+    hs.eventtap.event.types.leftMouseUp,
+    hs.eventtap.event.types.rightMouseDown,
+    hs.eventtap.event.types.rightMouseUp
+  },
   function (evt)
     if not obj.enabled then
       return false
@@ -174,9 +180,14 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
     if eventIsSynthetic(evt) then
       return false
     end
+    -- Mouse event -> skip looking up hotkey table
+    if not (evt:getType() == hs.eventtap.event.types.keyDown) then
+      obj.runHooks(obj.beforeSendHook, evt)
+      return false
+    end
     local entry = lookupKeyDwim(evt)
+    -- No hotkey entry found -> passthrough the event
     if not entry then
-      -- No hotkey entry found -> passthrough the event
       obj.runHooks(obj.beforeSendHook, evt)
       return false
     end
