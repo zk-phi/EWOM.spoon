@@ -48,13 +48,25 @@ obj._watchers[#obj._watchers + 1] = hs.application.watcher.new(
 obj.beforeSendHook = {}
 obj.afterSendHook = {}
 
+local SYNTHETIC_EVENT_SIGNATURE = 55555
+
+local function sendSynteticEvent (evt)
+  obj.runHooks(obj.beforeSendHook, { mod, char })
+  evt:setProperty(hs.eventtap.event.properties.eventSourceUserData, SYNTHETIC_EVENT_SIGNATURE)
+  evt:post()
+  obj.runHooks(obj.afterSendHook, { mod, char })
+end
+
+local function eventIsSynthetic (evt)
+  local val = evt:getProperty(hs.eventtap.event.properties.eventSourceUserData)
+  return val == SYNTHETIC_EVENT_SIGNATURE
+end
+
 -- Like fs.eventtap.keyStroke but faster
 -- https://github.com/Hammerspoon/hammerspoon/issues/1082
 function obj.sendKey (mod, char)
-  obj.runHooks(obj.beforeSendHook, { mod, char })
-  hs.eventtap.event.newKeyEvent(mod, char, true):post()
-  hs.eventtap.event.newKeyEvent(mod, char, false):post()
-  obj.runHooks(obj.afterSendHook, { mod, char })
+  sendSynteticEvent(hs.eventtap.event.newKeyEvent(mod, char, true))
+  sendSynteticEvent(hs.eventtap.event.newKeyEvent(mod, char, false))
 end
 
 --
@@ -163,9 +175,8 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
     if not obj.enabled then
       return false
     end
-    -- skip synthetic events
-    local source = evt:getProperty(hs.eventtap.event.properties.eventSourceUnixProcessID)
-    if source > 0 then
+    -- Skip synthetic events to avoid infinite loop
+    if eventIsSynthetic(evt) then
       return false
     end
     local entry = lookupKeyDwim(evt)
