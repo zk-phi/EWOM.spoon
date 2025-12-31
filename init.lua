@@ -122,6 +122,8 @@ end
 obj.preCommandHook = {}
 obj.postCommandHook = {}
 
+obj.pendingDigitArgument = 0
+
 obj.enabled = true
 
 obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
@@ -141,8 +143,10 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
     end
     local repeated = evt:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat)
     if repeated == 0 or entry[2] then
+      local arg = obj.pendingDigitArgument
+      obj.pendingDigitArgument = 0
       obj.runHooks(obj.preCommandHook)
-      entry[1](evt:getCharacters(true))
+      entry[1](arg, evt:getCharacters(true))
       obj.runHooks(obj.postCommandHook)
     end
     return true
@@ -184,9 +188,6 @@ obj.addHook(obj.afterChangeHook, maybeResetMark)
 -- Digit arguments
 --
 
-obj.pendingDigitArgument = 0
-obj.digitArgument = 0
-
 local function maybeClearDigitArgument ()
   if obj.pendingDigitArgument > 0 then
     obj.pendingDigitArgument = 0
@@ -194,19 +195,13 @@ local function maybeClearDigitArgument ()
   end
 end
 
-local function fetchDigitArgument ()
-  obj.digitArgument = obj.pendingDigitArgument
-  obj.pendingDigitArgument = 0
-end
-
-function obj.cmd.digitArgument (key)
+function obj.cmd.digitArgument (arg, key)
   local digit = tonumber(key)
-  obj.pendingDigitArgument = obj.digitArgument * 10 + digit
+  obj.pendingDigitArgument = arg * 10 + digit
   hs.alert(obj.pendingDigitArgument)
 end
 
 obj.addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
-obj.addHook(obj.preCommandHook, fetchDigitArgument)
 
 --
 -- cx
@@ -214,8 +209,8 @@ obj.addHook(obj.preCommandHook, fetchDigitArgument)
 
 obj.cxMap = hs.hotkey.modal.new()
 
-function obj.cmd.cx ()
-  obj.pendingDigitArgument = obj.digitArgument
+function obj.cmd.cx (arg)
+  obj.pendingDigitArgument = arg
   obj.enableOverlayMap(obj.cxMap)
   hs.alert('C-x')
 end
@@ -247,8 +242,8 @@ function obj.cmd.kmacroEnd ()
   hs.alert('Macro recorded')
 end
 
-function obj.cmd.kmacroCall ()
-  for i = 1, math.max(1, obj.digitArgument) do
+function obj.cmd.kmacroCall (arg)
+  for i = 1, math.max(1, arg) do
     for j = 1, #obj.kmacro do
       obj.sendKey(obj.kmacro[j][1], obj.kmacro[j][2])
     end
@@ -264,8 +259,8 @@ function obj.cmd.setMarkCommand ()
   obj.markActive = true
 end
 
-function obj.cmd.keyboardQuit ()
-  if (not obj.markActive) and (not obj.overlayMap) and obj.digitArgument == 0 then
+function obj.cmd.keyboardQuit (arg)
+  if (not obj.markActive) and (not obj.overlayMap) and arg == 0 then
     -- nothing to clear => just send ESC
     obj.sendKey({}, 'esc')
   elseif obj.markActive then
@@ -274,15 +269,15 @@ function obj.cmd.keyboardQuit ()
   end
 end
 
-function obj.cmd.selfInsertCommand (key)
-  for i = 1, math.max(1, obj.digitArgument) do
+function obj.cmd.selfInsertCommand (arg, key)
+  for i = 1, math.max(1, arg) do
     obj.sendKey({}, key)
   end
   obj.runHooks(obj.afterChangeHook)
 end
 
-function obj.cmd.backwardChar ()
-  for i = 1, math.max(1, obj.digitArgument) do
+function obj.cmd.backwardChar (arg)
+  for i = 1, math.max(1, arg) do
     if obj.markActive then
       obj.sendKey({ 'shift' }, 'left')
     else
@@ -291,8 +286,8 @@ function obj.cmd.backwardChar ()
   end
 end
 
-function obj.cmd.forwardChar ()
-  for i = 1, math.max(1, obj.digitArgument) do
+function obj.cmd.forwardChar (arg)
+  for i = 1, math.max(1, arg) do
     if obj.markActive then
       obj.sendKey({ 'shift' }, 'right')
     else
@@ -301,8 +296,8 @@ function obj.cmd.forwardChar ()
   end
 end
 
-function obj.cmd.previousLine ()
-  for i = 1, math.max(1, obj.digitArgument) do
+function obj.cmd.previousLine (arg)
+  for i = 1, math.max(1, arg) do
     if obj.markActive then
       obj.sendKey({ 'shift' }, 'up')
     else
@@ -311,8 +306,8 @@ function obj.cmd.previousLine ()
   end
 end
 
-function obj.cmd.nextLine ()
-  for i = 1, math.max(1, obj.digitArgument) do
+function obj.cmd.nextLine (arg)
+  for i = 1, math.max(1, arg) do
     if obj.markActive then
       obj.sendKey({ 'shift' }, 'down')
     else
@@ -321,8 +316,8 @@ function obj.cmd.nextLine ()
   end
 end
 
-function obj.cmd.forwardWord ()
-  for i = 1, math.max(1, obj.digitArgument) do
+function obj.cmd.forwardWord (arg)
+  for i = 1, math.max(1, arg) do
     if obj.markActive then
       obj.sendKey({ 'shift', 'option' }, 'right')
     else
@@ -331,8 +326,8 @@ function obj.cmd.forwardWord ()
   end
 end
 
-function obj.cmd.backwardWord ()
-  for i = 1, math.max(1, obj.digitArgument) do
+function obj.cmd.backwardWord (arg)
+  for i = 1, math.max(1, arg) do
     if obj.markActive then
       obj.sendKey({ 'shift', 'option' }, 'left')
     else
