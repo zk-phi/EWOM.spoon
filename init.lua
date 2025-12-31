@@ -183,21 +183,22 @@ end
 --
 
 obj.digitArgumentValue = 0
-obj:addHook(
-  obj.postCommandHook,
-  function ()
-    if obj.digitArgumentValue > 0 then
-      hs.alert('Digit-argument cleared')
-    end
-    obj.digitArgumentValue = 0
+
+local function maybeClearDigitArgument ()
+  if obj.digitArgumentValue > 0 then
+    hs.alert('Digit-argument cleared')
   end
-)
+  obj.digitArgumentValue = 0
+end
 
 function obj:digitArgument ()
   local digit = tonumber(obj.lastKeyDown)
   obj.digitArgumentValue = obj.digitArgumentValue * 10 + digit
   hs.alert(obj.digitArgumentValue)
 end
+
+obj:addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
+obj:addHook(obj.postCommandHook, maybeClearDigitArgument)
 
 --
 -- Keyboard macro
