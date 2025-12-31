@@ -204,7 +204,7 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
     if repeated == 0 or entry[2] then
       local arg = nextDigitArgument
       nextDigitArgument = 0
-      entry[1](arg, evt:getCharacters(true))
+      entry[1](arg, evt)
     end
     return true
   end
@@ -216,6 +216,22 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
 
 obj.cmd = {}
 obj.afterChangeHook = {}
+
+-- Basic commands
+
+function obj.cmd.selfInsertCommand (arg, evt)
+  for i = 1, math.max(1, arg) do
+    sendSyntheticEvent(evt)
+  end
+  obj.runHooks(obj.afterChangeHook)
+end
+
+function obj.cmd.digitArgument (arg, evt)
+  local digit = tonumber(evt:getCharacters(true))
+  local val = arg * 10 + digit
+  obj.setDigitArgument(val)
+  hs.alert('C-' .. val)
+end
 
 -- Mark
 
@@ -235,15 +251,6 @@ end
 
 obj.addHook(obj.afterFocusChangeHook, maybeResetMark)
 obj.addHook(obj.afterChangeHook, maybeResetMark)
-
--- Digit arguments
-
-function obj.cmd.digitArgument (arg, key)
-  local digit = tonumber(key)
-  local val = arg * 10 + digit
-  obj.setDigitArgument(val)
-  hs.alert(val)
-end
 
 -- C-x
 
@@ -311,13 +318,6 @@ function obj.cmd.keyboardQuit (arg)
     hs.alert('Mark disabled')
     obj.markActive = false
   end
-end
-
-function obj.cmd.selfInsertCommand (arg, key)
-  for i = 1, math.max(1, arg) do
-    obj.sendKey({}, key)
-  end
-  obj.runHooks(obj.afterChangeHook)
 end
 
 function obj.cmd.backwardChar (arg)
