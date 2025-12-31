@@ -47,6 +47,23 @@ function obj.setApplicationFilter (fn)
 end
 
 --
+-- afterInputMethodChangeHook
+--
+
+obj.afterInputMethodChangeHook = {}
+
+obj._watchers[#obj._watchers + 1] = hs.keycodes.inputSourceChanged(
+  function ()
+    obj.runHooks(obj.afterInputMethodChangeHook, hs.keycodes.currentMethod())
+  end
+)
+
+function obj.setInputMethodFilter (fn)
+  fn(hs.keycodes.currentMethod())
+  obj.addHook(obj.afterInputMethodChangeHook, fn)
+end
+
+--
 -- sendKey
 --
 

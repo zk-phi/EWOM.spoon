@@ -15,6 +15,16 @@ EWOM.setApplicationFilter(
   end
 )
 
+EWOM.setInputMethodFilter(
+  function (method)
+    if method == nil then
+      EWOM.enableKeyBindings()
+    else
+      EWOM.disableKeyBindings()
+    end
+  end
+)
+
 EWOM.defineKey(EWOM.globalMap, {}, 'a', EWOM.cmd.selfInsertCommand)
 
 EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, '0', EWOM.cmd.digitArgument)
