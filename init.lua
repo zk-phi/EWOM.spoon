@@ -167,7 +167,7 @@ end
 local function maybeClearDigitArgument ()
   if nextDigitArgument > 0 then
     nextDigitArgument = 0
-    hs.alert("Argument cleared")
+    hs.alert('Argument cleared')
   end
 end
 
