@@ -42,6 +42,60 @@ obj._watchers[#obj._watchers + 1] = hs.application.watcher.new(
 ):start()
 
 --
+-- Keymap lookup
+--
+
+obj.globalMap = {}
+obj.overlayMap = nil
+
+local MODFLAGS =
+  hs.eventtap.event.rawFlagMasks.alternate |
+  hs.eventtap.event.rawFlagMasks.command |
+  hs.eventtap.event.rawFlagMasks.control |
+  hs.eventtap.event.rawFlagMasks.shift |
+  hs.eventtap.event.rawFlagMasks.deviceRightAlternate |
+  hs.eventtap.event.rawFlagMasks.deviceRightCommand |
+  hs.eventtap.event.rawFlagMasks.deviceRightControl |
+  hs.eventtap.event.rawFlagMasks.deviceRightShift
+
+function obj.defineKey (map, mods, char, fn, repeatable)
+  local e = hs.eventtap.event.newKeyEvent(mods, char, true)
+  local code = e:getKeyCode()
+  local flags = e:rawFlags() & MODFLAGS
+  if not map[code] then
+    map[code] = {}
+  end
+  map[code][flags] = { fn, repeatable }
+end
+
+local function maybeDisableOverlayMap (silent)
+  if obj.overlayMap then
+    obj.overlayMap = nil
+    if not silent then
+      hs.alert('Prefix cleared')
+    end
+  end
+end
+
+function obj.enableOverlayMap (map)
+  maybeDisableOverlayMap()
+  obj.overlayMap = map
+end
+
+local function lookupKey (map, evt)
+  local flagsMap = map and map[evt:getKeyCode()]
+  return flagsMap and flagsMap[evt:rawFlags() & MODFLAGS]
+end
+
+local function lookupKeyDwim (evt)
+  local entry = lookupKey(obj.overlayMap, evt) or lookupKey(obj.globalMap, evt)
+  maybeDisableOverlayMap(entry)
+  return entry
+end
+
+obj.addHook(obj.afterFocusChangeHook, maybeDisableOverlayMap)
+
+--
 -- sendKey
 --
 
@@ -58,7 +112,7 @@ function obj.sendKey (mod, char)
 end
 
 --
--- Keymap internals
+-- The Core
 --
 
 -- hs.hotkey can be fired with synthetic keyboard event too,
@@ -69,48 +123,6 @@ obj.preCommandHook = {}
 obj.postCommandHook = {}
 
 obj.enabled = true
-
-obj.globalMap = {}
-obj.overlayMap = nil
-
-obj.MODFLAGS =
-  hs.eventtap.event.rawFlagMasks.alternate |
-  hs.eventtap.event.rawFlagMasks.command |
-  hs.eventtap.event.rawFlagMasks.control |
-  hs.eventtap.event.rawFlagMasks.shift |
-  hs.eventtap.event.rawFlagMasks.deviceRightAlternate |
-  hs.eventtap.event.rawFlagMasks.deviceRightCommand |
-  hs.eventtap.event.rawFlagMasks.deviceRightControl |
-  hs.eventtap.event.rawFlagMasks.deviceRightShift
-
-function obj.enableOverlayMap (map)
-  maybeDisableOverlayMap()
-  obj.overlayMap = map
-end
-
-local function maybeDisableOverlayMap (silent)
-  if obj.overlayMap then
-    obj.overlayMap = nil
-    if not silent then
-      hs.alert('Prefix cleared')
-    end
-  end
-end
-
-function obj.defineKey (map, mods, char, fn, repeatable)
-  local e = hs.eventtap.event.newKeyEvent(mods, char, true)
-  local code = e:getKeyCode()
-  local flags = e:rawFlags() & obj.MODFLAGS
-  if not map[code] then
-    map[code] = {}
-  end
-  map[code][flags] = { fn, repeatable }
-end
-
-local function lookupKey (map, evt)
-  local flagsMap = map and map[evt:getKeyCode()]
-  return flagsMap and flagsMap[evt:rawFlags() & obj.MODFLAGS]
-end
 
 obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
   {hs.eventtap.event.types.keyDown},
@@ -123,8 +135,7 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
     if source > 0 then
       return false
     end
-    local entry = lookupKey(obj.overlayMap, evt) or lookupKey(obj.globalMap, evt)
-    maybeDisableOverlayMap(entry)
+    local entry = lookupKeyDwim(evt)
     if not entry then
       return false
     end
@@ -145,8 +156,6 @@ end
 function obj.enableKeyBindings ()
   obj.enabled = true
 end
-
-obj.addHook(obj.afterFocusChangeHook, maybeDisableOverlayMap)
 
 --
 -- Commands
