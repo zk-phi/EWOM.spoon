@@ -272,8 +272,10 @@ local function maybeResetMark ()
 end
 
 function obj.cmd.setMarkCommand ()
-  hs.alert('Mark enabled')
-  obj.markActive = true
+  if not obj.markActive then
+    hs.alert('Mark enabled')
+    obj.markActive = true
+  end
 end
 
 obj.addHook(obj.afterFocusChangeHook, maybeResetMark)
