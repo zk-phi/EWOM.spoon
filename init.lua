@@ -233,6 +233,21 @@ function obj.cmd.digitArgument (arg, evt)
   hs.alert('C-' .. val)
 end
 
+function obj.cmd.restricted (cmdName)
+  return function ()
+    hs.alert(cmdName .. ' is restricted in this keymap')
+  end
+end
+
+function obj.cmd.notImplemented (cmdName)
+  return function ()
+    hs.alert(cmdName .. ' is not implemented')
+  end
+end
+
+function obj.cmd.ignore ()
+end
+
 -- Mark
 
 obj.markActive = false
