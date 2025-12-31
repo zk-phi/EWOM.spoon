@@ -1,6 +1,25 @@
-WIP Lua (Hammerspoon) alternative of EWOW https://github.com/zk-phi/ewow for Mac.
+Emacs keybinds for Macintosh
 
-Sample `init.lua`:
+WIP Lua alternative of EWOW https://github.com/zk-phi/ewow, but for Mac.
+
+# Installation
+
+1. Install Hammerspoon and launch to complete the initial setup
+
+``` terminal
+$ brew install hammerspoon
+```
+
+2. Clone this repo into `~/.hammerspoon/Spoons/`
+
+``` terminal
+$ cd ~/.hammerspoon/Spoons/
+$ git clone https://github.com/zk-phi/EWOM.spoon.git
+```
+
+3. Load EWOM in your `~/.hammerspoon/init.lua`
+
+Sample:
 
 ``` lua
 local EWOM = hs.loadSpoon("EWOM")
