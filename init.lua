@@ -14,9 +14,6 @@ obj.homepage = 'https://github.com/zk-phi/dotfiles'
 -- Hooks
 --
 
-obj.preCommandHook = {}
-obj.postCommandHook = {}
-
 function obj.addHook (hook, fn)
   hook[#hook + 1] = fn
 end
@@ -71,6 +68,9 @@ end
 -- which easily leads to infinite recursion. so implement by our own
 -- https://github.com/Hammerspoon/hammerspoon/issues/1230
 
+obj.preCommandHook = {}
+obj.postCommandHook = {}
+
 obj.lastKeyDown = nil
 
 obj.enabled = true
@@ -116,21 +116,26 @@ obj.watchers[#obj.watchers + 1] = hs.eventtap.new(
       return false
     end
     local entry = lookupKey(obj.overlayMap, evt) or lookupKey(obj.globalMap, evt)
+    obj.maybeDisableOverlayMap(entry)
     if not entry then
       return false
     end
     local repeated = evt:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat)
     if repeated == 0 or entry[2] then
+      obj.runHooks(obj.preCommandHook)
       entry[1]()
+      obj.runHooks(obj.postCommandHook)
     end
     return true
   end
 ):start()
 
-function obj.maybeDisableOverlayMap ()
+function obj.maybeDisableOverlayMap (silent)
   if obj.overlayMap then
     obj.overlayMap = nil
-    -- hs.alert('Prefix cleared')
+    if not silent then
+      hs.alert('Prefix cleared')
+    end
   end
 end
 
@@ -148,7 +153,6 @@ function obj.enableKeyBindings ()
 end
 
 obj.addHook(obj.afterFocusChangeHook, obj.maybeDisableOverlayMap)
-obj.addHook(obj.postCommandHook, obj.maybeDisableOverlayMap)
 
 --
 -- Commands
@@ -188,23 +192,29 @@ end
 -- Digit arguments
 --
 
-obj.digitArgumentValue = 0
+local pendingDigitArgument = 0
+obj.digitArgument = 0
 
 local function maybeClearDigitArgument ()
-  if obj.digitArgumentValue > 0 then
-    hs.alert('Digit-argument cleared')
+  if pendingDigitArgument > 0 then
+    pendingDigitArgument = 0
+    hs.alert("Argument cleared")
   end
-  obj.digitArgumentValue = 0
+end
+
+local function fetchDigitArgument ()
+  obj.digitArgument = pendingDigitArgument
+  pendingDigitArgument = 0
 end
 
 function obj.cmd.digitArgument ()
   local digit = tonumber(obj.lastKeyDown)
-  obj.digitArgumentValue = obj.digitArgumentValue * 10 + digit
-  hs.alert(obj.digitArgumentValue)
+  pendingDigitArgument = obj.digitArgument * 10 + digit
+  hs.alert(pendingDigitArgument)
 end
 
 obj.addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
-obj.addHook(obj.postCommandHook, maybeClearDigitArgument)
+obj.addHook(obj.preCommandHook, fetchDigitArgument)
 
 --
 -- Keyboard macro
@@ -223,28 +233,22 @@ obj.addHook(
 )
 
 function obj.cmd.kmacroStart ()
-  obj.runHooks(obj.preCommandHook)
   obj.kmacroRecording = true
   obj.kmacro = {}
   hs.alert('Macro recording ...')
-  obj.runHooks(obj.postCommandHook)
 end
 
 function obj.cmd.kmacroEnd ()
-  obj.runHooks(obj.preCommandHook)
   obj.kmacroRecording = false
   hs.alert('Macro recorded')
-  obj.runHooks(obj.postCommandHook)
 end
 
 function obj.cmd.kmacroCall ()
-  obj.runHooks(obj.preCommandHook)
-  for i = 1, math.max(1, obj.digitArgumentValue) do
+  for i = 1, math.max(1, obj.digitArgument) do
     for j = 1, #obj.kmacro do
       sendKey(obj.kmacro[j][1], obj.kmacro[j][2])
     end
   end
-  obj.runHooks(obj.postCommandHook)
 end
 
 --
@@ -252,110 +256,90 @@ end
 --
 
 function obj.cmd.setMarkCommand ()
-  obj.runHooks(obj.preCommandHook)
   hs.alert('Mark enabled')
   obj.markActive = true
-  obj.runHooks(obj.postCommandHook)
 end
 
 function obj.cmd.keyboardQuit ()
-  obj.runHooks(obj.preCommandHook)
-  if (not obj.markActive) and (not obj.overlayMap) and obj.digitArgumentValue == 0 then
+  if (not obj.markActive) and (not obj.overlayMap) and obj.digitArgument == 0 then
     -- nothing to clear => just send ESC
     sendKey({}, 'esc')
   elseif obj.markActive then
     hs.alert('Mark disabled')
     obj.markActive = false
   end
-  obj.runHooks(obj.postCommandHook)
 end
 
 function obj.cmd.selfInsertCommand ()
-  obj.runHooks(obj.preCommandHook)
   local ch = obj.lastKeyDown
-  for i = 1, math.max(1, obj.digitArgumentValue) do
+  for i = 1, math.max(1, obj.digitArgument) do
     sendKey({}, ch)
   end
   obj.runHooks(obj.afterChangeHook)
-  obj.runHooks(obj.postCommandHook)
 end
 
 function obj.cmd.backwardChar ()
-  obj.runHooks(obj.preCommandHook)
-  for i = 1, math.max(1, obj.digitArgumentValue) do
+  for i = 1, math.max(1, obj.digitArgument) do
     if obj.markActive then
       sendKey({ 'shift' }, 'left')
     else
       sendKey({}, 'left')
     end
   end
-  obj.runHooks(obj.postCommandHook)
 end
 
 function obj.cmd.forwardChar ()
-  obj.runHooks(obj.preCommandHook)
-  for i = 1, math.max(1, obj.digitArgumentValue) do
+  for i = 1, math.max(1, obj.digitArgument) do
     if obj.markActive then
       sendKey({ 'shift' }, 'right')
     else
       sendKey({}, 'right')
     end
   end
-  obj.runHooks(obj.postCommandHook)
 end
 
 function obj.cmd.previousLine ()
-  obj.runHooks(obj.preCommandHook)
-  for i = 1, math.max(1, obj.digitArgumentValue) do
+  for i = 1, math.max(1, obj.digitArgument) do
     if obj.markActive then
       sendKey({ 'shift' }, 'up')
     else
       sendKey({}, 'up')
     end
   end
-  obj.runHooks(obj.postCommandHook)
 end
 
 function obj.cmd.nextLine ()
-  obj.runHooks(obj.preCommandHook)
-  for i = 1, math.max(1, obj.digitArgumentValue) do
+  for i = 1, math.max(1, obj.digitArgument) do
     if obj.markActive then
       sendKey({ 'shift' }, 'down')
     else
       sendKey({}, 'down')
     end
   end
-  obj.runHooks(obj.postCommandHook)
 end
 
 function obj.cmd.forwardWord ()
-  obj.runHooks(obj.preCommandHook)
-  for i = 1, math.max(1, obj.digitArgumentValue) do
+  for i = 1, math.max(1, obj.digitArgument) do
     if obj.markActive then
       sendKey({ 'shift', 'option' }, 'right')
     else
       sendKey({ 'option' }, 'right')
     end
   end
-  obj.runHooks(obj.postCommandHook)
 end
 
 function obj.cmd.backwardWord ()
-  obj.runHooks(obj.preCommandHook)
-  for i = 1, math.max(1, obj.digitArgumentValue) do
+  for i = 1, math.max(1, obj.digitArgument) do
     if obj.markActive then
       sendKey({ 'shift', 'option' }, 'left')
     else
       sendKey({ 'option' }, 'left')
     end
   end
-  obj.runHooks(obj.postCommandHook)
 end
 
 function obj.cmd.saveBuffer ()
-  obj.runHooks(obj.preCommandHook)
   sendKey({ 'cmd' }, 's')
-  obj.runHooks(obj.postCommandHook)
 end
 
 return obj
