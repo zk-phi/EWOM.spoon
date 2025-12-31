@@ -191,9 +191,7 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
 obj.cmd = {}
 obj.afterChangeHook = {}
 
---
 -- Mark
---
 
 obj.markActive = false
 
@@ -204,12 +202,15 @@ local function maybeResetMark ()
   end
 end
 
+function obj.cmd.setMarkCommand ()
+  hs.alert('Mark enabled')
+  obj.markActive = true
+end
+
 obj.addHook(obj.afterFocusChangeHook, maybeResetMark)
 obj.addHook(obj.afterChangeHook, maybeResetMark)
 
---
 -- Digit arguments
---
 
 function obj.cmd.digitArgument (arg, key)
   local digit = tonumber(key)
@@ -218,9 +219,7 @@ function obj.cmd.digitArgument (arg, key)
   hs.alert(val)
 end
 
---
--- cx
---
+-- C-x
 
 obj.cxMap = hs.hotkey.modal.new()
 
@@ -230,9 +229,7 @@ function obj.cmd.cx (arg)
   hs.alert('C-x')
 end
 
---
 -- Keyboard macro
---
 
 obj.kmacroRecording = false
 obj.kmacro = {}
@@ -268,14 +265,7 @@ end
 -- kmacro can be defined across applications, except for disabled ones
 obj.addHook(obj.keybindsDisabledHook, obj.cmd.kmacroEnd)
 
---
--- Commands
---
-
-function obj.cmd.setMarkCommand ()
-  hs.alert('Mark enabled')
-  obj.markActive = true
-end
+-- Others
 
 function obj.cmd.keyboardQuit (arg)
   if (not obj.markActive) and (not obj.overlayMap) and arg == 0 then
