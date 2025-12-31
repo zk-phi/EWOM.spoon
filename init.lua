@@ -68,8 +68,6 @@ end
 obj.preCommandHook = {}
 obj.postCommandHook = {}
 
-obj.lastKeyDown = nil
-
 obj.enabled = true
 
 obj.globalMap = {}
@@ -103,7 +101,6 @@ end
 obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
   {hs.eventtap.event.types.keyDown},
   function (evt)
-    obj.lastKeyDown = evt:getCharacters(true)
     if not obj.enabled then
       return false
     end
@@ -120,7 +117,7 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
     local repeated = evt:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat)
     if repeated == 0 or entry[2] then
       obj.runHooks(obj.preCommandHook)
-      entry[1]()
+      entry[1](evt:getCharacters(true))
       obj.runHooks(obj.postCommandHook)
     end
     return true
@@ -193,8 +190,8 @@ local function fetchDigitArgument ()
   pendingDigitArgument = 0
 end
 
-function obj.cmd.digitArgument ()
-  local digit = tonumber(obj.lastKeyDown)
+function obj.cmd.digitArgument (key)
+  local digit = tonumber(key)
   pendingDigitArgument = obj.digitArgument * 10 + digit
   hs.alert(pendingDigitArgument)
 end
@@ -268,10 +265,9 @@ function obj.cmd.keyboardQuit ()
   end
 end
 
-function obj.cmd.selfInsertCommand ()
-  local ch = obj.lastKeyDown
+function obj.cmd.selfInsertCommand (key)
   for i = 1, math.max(1, obj.digitArgument) do
-    sendKey({}, ch)
+    sendKey({}, key)
   end
   obj.runHooks(obj.afterChangeHook)
 end
