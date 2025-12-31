@@ -49,10 +49,14 @@ obj.beforeSendHook = {}
 
 local SYNTHETIC_EVENT_SIGNATURE = 55555
 
-local function sendSynteticEvent (evt)
+local function sendSynteticEvent (evt, delay)
   evt:setProperty(hs.eventtap.event.properties.eventSourceUserData, SYNTHETIC_EVENT_SIGNATURE)
   obj.runHooks(obj.beforeSendHook, evt)
-  evt:post()
+  if delay and delay > 0 then
+    hs.timer.delayed.new(delay, function () evt:post() end):start()
+  else
+    evt:post()
+  end
 end
 
 local function eventIsSynthetic (evt)
@@ -280,7 +284,7 @@ function obj.cmd.kmacroCall (arg)
   end
   for i = 1, math.max(1, arg) do
     for j = 1, #obj.kmacro do
-      sendSynteticEvent(obj.kmacro[j])
+      sendSynteticEvent(obj.kmacro[j], 0.1 * ((i - 1) * #obj.kmacro + j))
     end
   end
 end
