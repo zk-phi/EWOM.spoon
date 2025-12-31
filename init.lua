@@ -250,8 +250,10 @@ function obj.cmd.kmacroStart ()
 end
 
 function obj.cmd.kmacroEnd ()
-  obj.kmacroRecording = false
-  hs.alert('Macro recorded')
+  if obj.kmacroRecording then
+    obj.kmacroRecording = false
+    hs.alert('Macro recorded')
+  end
 end
 
 function obj.cmd.kmacroCall (arg)
