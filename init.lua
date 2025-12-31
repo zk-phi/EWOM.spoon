@@ -16,7 +16,6 @@ obj.homepage = 'https://github.com/zk-phi/dotfiles'
 
 obj.preCommandHook = {}
 obj.postCommandHook = {}
-obj.afterChangeHook = {}
 
 function obj.addHook (hook, fn)
   hook[#hook + 1] = fn
@@ -152,6 +151,13 @@ obj.addHook(obj.afterFocusChangeHook, obj.maybeDisableOverlayMap)
 obj.addHook(obj.postCommandHook, obj.maybeDisableOverlayMap)
 
 --
+-- Commands
+--
+
+obj.cmd = {}
+obj.afterChangeHook = {}
+
+--
 -- Mark
 --
 
@@ -173,7 +179,7 @@ obj.addHook(obj.afterChangeHook, maybeResetMark)
 
 obj.cxMap = hs.hotkey.modal.new()
 
-function obj.cx ()
+function obj.cmd.cx ()
   hs.alert('C-x')
   obj.enableOverlayMap(obj.cxMap)
 end
@@ -191,7 +197,7 @@ local function maybeClearDigitArgument ()
   obj.digitArgumentValue = 0
 end
 
-function obj.digitArgument ()
+function obj.cmd.digitArgument ()
   local digit = tonumber(obj.lastKeyDown)
   obj.digitArgumentValue = obj.digitArgumentValue * 10 + digit
   hs.alert(obj.digitArgumentValue)
@@ -216,7 +222,7 @@ obj.addHook(
   end
 )
 
-function obj.kmacroStart ()
+function obj.cmd.kmacroStart ()
   obj.runHooks(obj.preCommandHook)
   obj.kmacroRecording = true
   obj.kmacro = {}
@@ -224,14 +230,14 @@ function obj.kmacroStart ()
   obj.runHooks(obj.postCommandHook)
 end
 
-function obj.kmacroEnd ()
+function obj.cmd.kmacroEnd ()
   obj.runHooks(obj.preCommandHook)
   obj.kmacroRecording = false
   hs.alert('Macro recorded')
   obj.runHooks(obj.postCommandHook)
 end
 
-function obj.kmacroCall ()
+function obj.cmd.kmacroCall ()
   obj.runHooks(obj.preCommandHook)
   for i = 1, math.max(1, obj.digitArgumentValue) do
     for j = 1, #obj.kmacro do
@@ -245,14 +251,14 @@ end
 -- Commands
 --
 
-function obj.setMarkCommand ()
+function obj.cmd.setMarkCommand ()
   obj.runHooks(obj.preCommandHook)
   hs.alert('Mark enabled')
   obj.markActive = true
   obj.runHooks(obj.postCommandHook)
 end
 
-function obj.keyboardQuit ()
+function obj.cmd.keyboardQuit ()
   obj.runHooks(obj.preCommandHook)
   if (not obj.markActive) and (not obj.overlayMap) and obj.digitArgumentValue == 0 then
     -- nothing to clear => just send ESC
@@ -264,7 +270,7 @@ function obj.keyboardQuit ()
   obj.runHooks(obj.postCommandHook)
 end
 
-function obj.selfInsertCommand ()
+function obj.cmd.selfInsertCommand ()
   obj.runHooks(obj.preCommandHook)
   local ch = obj.lastKeyDown
   for i = 1, math.max(1, obj.digitArgumentValue) do
@@ -274,7 +280,7 @@ function obj.selfInsertCommand ()
   obj.runHooks(obj.postCommandHook)
 end
 
-function obj.backwardChar ()
+function obj.cmd.backwardChar ()
   obj.runHooks(obj.preCommandHook)
   for i = 1, math.max(1, obj.digitArgumentValue) do
     if obj.markActive then
@@ -286,7 +292,7 @@ function obj.backwardChar ()
   obj.runHooks(obj.postCommandHook)
 end
 
-function obj.forwardChar ()
+function obj.cmd.forwardChar ()
   obj.runHooks(obj.preCommandHook)
   for i = 1, math.max(1, obj.digitArgumentValue) do
     if obj.markActive then
@@ -298,7 +304,7 @@ function obj.forwardChar ()
   obj.runHooks(obj.postCommandHook)
 end
 
-function obj.previousLine ()
+function obj.cmd.previousLine ()
   obj.runHooks(obj.preCommandHook)
   for i = 1, math.max(1, obj.digitArgumentValue) do
     if obj.markActive then
@@ -310,7 +316,7 @@ function obj.previousLine ()
   obj.runHooks(obj.postCommandHook)
 end
 
-function obj.nextLine ()
+function obj.cmd.nextLine ()
   obj.runHooks(obj.preCommandHook)
   for i = 1, math.max(1, obj.digitArgumentValue) do
     if obj.markActive then
@@ -322,7 +328,7 @@ function obj.nextLine ()
   obj.runHooks(obj.postCommandHook)
 end
 
-function obj.forwardWord ()
+function obj.cmd.forwardWord ()
   obj.runHooks(obj.preCommandHook)
   for i = 1, math.max(1, obj.digitArgumentValue) do
     if obj.markActive then
@@ -334,7 +340,7 @@ function obj.forwardWord ()
   obj.runHooks(obj.postCommandHook)
 end
 
-function obj.backwardWord ()
+function obj.cmd.backwardWord ()
   obj.runHooks(obj.preCommandHook)
   for i = 1, math.max(1, obj.digitArgumentValue) do
     if obj.markActive then
@@ -346,7 +352,7 @@ function obj.backwardWord ()
   obj.runHooks(obj.postCommandHook)
 end
 
-function obj.saveBuffer ()
+function obj.cmd.saveBuffer ()
   obj.runHooks(obj.preCommandHook)
   sendKey({ 'cmd' }, 's')
   obj.runHooks(obj.postCommandHook)
