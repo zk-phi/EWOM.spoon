@@ -433,6 +433,123 @@ function obj.cmd.backwardWord (arg)
   end
 end
 
+function obj.cmd.beginningOfLine ()
+  if obj.markActive then
+    obj.sendKey({ 'command', 'shift' }, 'left')
+  else
+    obj.sendKey({ 'command' }, 'left')
+  end
+end
+
+function obj.cmd.endOfLine ()
+  if obj.markActive then
+    obj.sendKey({ 'command', 'shift' }, 'right')
+  else
+    obj.sendKey({ 'command' }, 'right')
+  end
+end
+
+function obj.cmd.scrollUp (arg)
+  for i = 1, math.max(1, arg) do
+    if obj.markActive then
+      obj.sendKey({ 'shift' }, 'pagedown')
+    else
+      obj.sendKey({}, 'pagedown')
+    end
+  end
+end
+
+function obj.cmd.isearch ()
+  maybeResetMark()
+  obj.sendKey({ 'command' }, 'f')
+end
+
+-- Edit
+
+function obj.cmd.indentForTab (arg)
+  for i = 1, math.max(1, arg) do
+    obj.sendKey({}, 'tab')
+  end
+  obj.runHooks(obj.afterChangeHook)
+end
+
+function obj.cmd.deleteChar (arg)
+  for i = 1, math.max(1, arg) do
+    -- unfortunately ({ 'fn' }, 'delete') did not work
+    -- https://github.com/Hammerspoon/hammerspoon/issues/1614
+    obj.sendKey({}, 'forwarddelete')
+  end
+  obj.runHooks(obj.afterChangeHook)
+end
+
+function obj.cmd.deleteBackwardChar (arg)
+  for i = 1, math.max(1, arg) do
+    obj.sendKey({}, 'delete')
+  end
+  obj.runHooks(obj.afterChangeHook)
+end
+
+function obj.cmd.killLine ()
+  obj.sendKey({ 'command', 'shift' }, 'right')
+  obj.sendKey({}, 'delete')
+  obj.runHooks(obj.afterChangeHook)
+end
+
+function obj.cmd.newline (arg)
+  for i = 1, math.max(1, arg) do
+    obj.sendKey({}, 'return')
+  end
+  obj.runHooks(obj.afterChangeHook)
+end
+
+function obj.cmd.killRegion ()
+  obj.sendKey({ 'command' }, 'x')
+  obj.runHooks(obj.afterChangeHook)
+end
+
+function obj.cmd.yank (arg)
+  if arg > 1 then
+    hs.alert('Kill-ring history is unsupported for now')
+  else
+    obj.sendKey({ 'command' }, 'v')
+    obj.runHooks(obj.afterChangeHook)
+  end
+end
+
+function obj.cmd.openLine (arg)
+  for i = 1, math.max(1, arg) do
+    obj.sendKey({}, 'return')
+    obj.sendKey({}, 'up')
+    obj.sendKey({ 'command' }, 'right')
+  end
+  obj.runHooks(obj.afterChangeHook)
+end
+
+function obj.cmd.undo (arg)
+  for i = 1, math.max(1, arg) do
+    obj.sendKey({ 'command' }, 'z')
+  end
+  obj.runHooks(obj.afterChangeHook)
+end
+
+-- Frames
+
+function obj.cmd.suspendFrame ()
+  obj.sendKey({ 'command' }, 'm')
+end
+
+-- Others
+
+function obj.cmd.toggleInputMethod ()
+  if hs.keycodes.currentMethod() == nil then
+    -- kana key
+    obj.sendKey({}, 0x68)
+  else
+    -- eisu key
+    obj.sendKey({}, 0x66)
+  end
+end
+
 function obj.cmd.saveBuffer ()
   obj.sendKey({ 'cmd' }, 's')
 end
