@@ -50,8 +50,8 @@ obj.beforeSendHook = {}
 local SYNTHETIC_EVENT_SIGNATURE = 55555
 
 local function sendSynteticEvent (evt)
-  obj.runHooks(obj.beforeSendHook, { mod, char })
   evt:setProperty(hs.eventtap.event.properties.eventSourceUserData, SYNTHETIC_EVENT_SIGNATURE)
+  obj.runHooks(obj.beforeSendHook, evt)
   evt:post()
 end
 
@@ -176,6 +176,8 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
     end
     local entry = lookupKeyDwim(evt)
     if not entry then
+      -- No hotkey entry found -> passthrough the event
+      obj.runHooks(obj.beforeSendHook, evt)
       return false
     end
     local repeated = evt:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat)
@@ -240,9 +242,9 @@ obj.kmacro = {}
 
 obj.addHook(
   obj.beforeSendHook,
-  function (key)
+  function (evt)
     if obj.kmacroRecording then
-      obj.kmacro[#obj.kmacro + 1] = key
+      obj.kmacro[#obj.kmacro + 1] = evt:copy()
     end
   end
 )
@@ -267,7 +269,7 @@ function obj.cmd.kmacroCall (arg)
   end
   for i = 1, math.max(1, arg) do
     for j = 1, #obj.kmacro do
-      obj.sendKey(obj.kmacro[j][1], obj.kmacro[j][2])
+      sendSynteticEvent(obj.kmacro[j])
     end
   end
 end
