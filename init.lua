@@ -144,6 +144,8 @@ obj.keybindsDisabledHook = {}
 obj.keybindsEnabledHook = {}
 obj.enabled = true
 
+obj.lastCommand = nil
+
 function obj.disableKeyBindings ()
   obj.enabled = false
   obj.runHooks(obj.keybindsDisabledHook)
@@ -192,12 +194,14 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
     -- Mouse event -> skip looking up hotkey table
     if not (evt:getType() == hs.eventtap.event.types.keyDown) then
       obj.runHooks(obj.beforeSendHook, evt)
+      obj.lastCommand = nil
       return false
     end
     local entry = lookupKeyDwim(evt)
     -- No hotkey entry found -> passthrough the event
     if not entry then
       obj.runHooks(obj.beforeSendHook, evt)
+      obj.lastCommand = nil
       return false
     end
     local repeated = evt:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat)
@@ -205,6 +209,7 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
       local arg = nextDigitArgument
       nextDigitArgument = 0
       entry[1](arg, evt)
+      obj.lastCommand = entry[1]
     end
     return true
   end
@@ -321,17 +326,17 @@ obj.addHook(obj.keybindsDisabledHook, obj.cmd.kmacroEnd)
 
 -- Others
 
-function obj.cmd.keyboardQuit (arg)
-  if (not obj.markActive) and (not obj.overlayMap) and arg == 0 then
-    -- nothing to clear => just send ESC
-    obj.sendKey({}, 'esc')
-    return
-  end
-  -- otherwise avoid sending ESC
-  -- note that `overlayMap` and `arg` will be cleared automatically
+function obj.cmd.keyboardQuit ()
+  -- Disable mark (note that arg and overlayMap are disabled automatically)
   if obj.markActive then
-    hs.alert('Mark disabled')
     obj.markActive = false
+  end
+  -- Tap twice to send ESC
+  if obj.lastCommand == obj.cmd.keyboardQuit then
+    obj.sendKey({}, 'escape')
+    hs.alert('Esc')
+  else
+    hs.alert('Quit')
   end
 end
 
