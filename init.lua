@@ -171,13 +171,17 @@ obj.enabled = true
 obj.lastCommand = nil
 
 function obj.disableKeyBindings ()
-  obj.enabled = false
-  obj.runHooks(obj.keybindsDisabledHook)
+  if obj.enabled then
+    obj.enabled = false
+    obj.runHooks(obj.keybindsDisabledHook)
+  end
 end
 
 function obj.enableKeyBindings ()
-  obj.enabled = true
-  obj.runHooks(obj.keybindsEnabledHook)
+  if not obj.enabled then
+    obj.enabled = true
+    obj.runHooks(obj.keybindsEnabledHook)
+  end
 end
 
 -- digit argument
