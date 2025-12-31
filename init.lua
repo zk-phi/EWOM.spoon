@@ -46,7 +46,6 @@ obj._watchers[#obj._watchers + 1] = hs.application.watcher.new(
 --
 
 obj.beforeSendHook = {}
-obj.afterSendHook = {}
 
 local SYNTHETIC_EVENT_SIGNATURE = 55555
 
@@ -54,7 +53,6 @@ local function sendSynteticEvent (evt)
   obj.runHooks(obj.beforeSendHook, { mod, char })
   evt:setProperty(hs.eventtap.event.properties.eventSourceUserData, SYNTHETIC_EVENT_SIGNATURE)
   evt:post()
-  obj.runHooks(obj.afterSendHook, { mod, char })
 end
 
 local function eventIsSynthetic (evt)
@@ -166,9 +164,6 @@ obj.addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
 
 -- the event loop
 
-obj.preCommandHook = {}
-obj.postCommandHook = {}
-
 obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
   {hs.eventtap.event.types.keyDown},
   function (evt)
@@ -187,9 +182,7 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
     if repeated == 0 or entry[2] then
       local arg = nextDigitArgument
       nextDigitArgument = 0
-      obj.runHooks(obj.preCommandHook)
       entry[1](arg, evt:getCharacters(true))
-      obj.runHooks(obj.postCommandHook)
     end
     return true
   end
@@ -246,7 +239,7 @@ obj.kmacroRecording = false
 obj.kmacro = {}
 
 obj.addHook(
-  obj.afterSendHook,
+  obj.beforeSendHook,
   function (key)
     if obj.kmacroRecording then
       obj.kmacro[#obj.kmacro + 1] = key
