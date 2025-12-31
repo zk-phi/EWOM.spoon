@@ -1,4 +1,4 @@
-Emacs keybinds for Macintosh
+Emacs keybinds for Macintosh (including kmacro feature etc)
 
 WIP Lua alternative of EWOW https://github.com/zk-phi/ewow, but for Mac.
 
