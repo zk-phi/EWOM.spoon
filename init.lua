@@ -371,24 +371,21 @@ obj.addHook(
   end
 )
 
-function obj.cmd.kmacroStart ()
+function obj.cmd.kmacroStartMacro ()
   obj.kmacroRecording = true
   obj.kmacro = {}
   hs.alert('Macro recording ...')
 end
 
-function obj.cmd.kmacroEnd ()
+function obj.cmd.kmacroEndMacro ()
   if obj.kmacroRecording then
     obj.kmacroRecording = false
     hs.alert('Macro recorded')
   end
 end
 
-function obj.cmd.kmacroCall (arg)
-  if obj.kmacroRecording then
-    hs.alert('ERROR: Macro is recording')
-    return
-  end
+function obj.cmd.kmacroEndAndCallMacro (arg)
+  obj.cmd.kmacroEndMacro()
   for i = 1, math.max(1, arg) do
     for j = 1, #obj.kmacro do
       sendSyntheticEvent(obj.kmacro[j], 0.1 * ((i - 1) * #obj.kmacro + j))
@@ -397,7 +394,7 @@ function obj.cmd.kmacroCall (arg)
 end
 
 -- kmacro can be defined across applications, except for disabled ones
-obj.addHook(obj.keybindsDisabledHook, obj.cmd.kmacroEnd)
+obj.addHook(obj.keybindsDisabledHook, obj.cmd.kmacroEndMacro)
 
 -- Cursor
 
@@ -768,11 +765,11 @@ function obj.registerDefaultKeymap ()
   -- TODO: C-M-S-*
 
   -- TODO: C-x *
-  obj.defineKey(obj.cxMap, {}, 'e', obj.cmd.kmacroCall)
+  obj.defineKey(obj.cxMap, {}, 'e', obj.cmd.kmacroEndAndCallMacro)
 
   -- TODO: C-x S-*
-  obj.defineKey(obj.cxMap, { 'shift' }, '9', obj.cmd.kmacroStart)
-  obj.defineKey(obj.cxMap, { 'shift' }, '0', obj.cmd.kmacroEnd)
+  obj.defineKey(obj.cxMap, { 'shift' }, '9', obj.cmd.kmacroStartMacro)
+  obj.defineKey(obj.cxMap, { 'shift' }, '0', obj.cmd.kmacroEndMacro)
 
   -- TODO: C-x C-*
   obj.defineKey(obj.cxMap, { 'ctrl' }, 's', obj.cmd.saveBuffer)
