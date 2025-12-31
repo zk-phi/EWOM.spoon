@@ -19,31 +19,10 @@ EWOM.setInputMethodFilter(
   end
 )
 
-EWOM.defineKey(EWOM.globalMap, {}, 'a', EWOM.cmd.selfInsertCommand)
+-- See EWOM.spoon/init.lua for the full list of keybinds
+EWOM.registerDefaultKeymap()
 
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, '0', EWOM.cmd.digitArgument)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, '1', EWOM.cmd.digitArgument)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, '2', EWOM.cmd.digitArgument)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, '3', EWOM.cmd.digitArgument)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, '4', EWOM.cmd.digitArgument)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, '5', EWOM.cmd.digitArgument)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, '6', EWOM.cmd.digitArgument)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, '7', EWOM.cmd.digitArgument)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, '8', EWOM.cmd.digitArgument)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, '9', EWOM.cmd.digitArgument)
-
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, 'x', EWOM.cmd.cx)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, 'space', EWOM.cmd.setMarkCommand)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, 'g', EWOM.cmd.keyboardQuit)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, 'f', EWOM.cmd.forwardChar, true)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, 'b', EWOM.cmd.backwardChar, true)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, 'n', EWOM.cmd.nextLine, true)
-EWOM.defineKey(EWOM.globalMap, { 'ctrl' }, 'p', EWOM.cmd.previousLine, true)
-EWOM.defineKey(EWOM.globalMap, { 'command', 'ctrl' }, 'f', EWOM.cmd.forwardWord, true)
-EWOM.defineKey(EWOM.globalMap, { 'command', 'ctrl' }, 'b', EWOM.cmd.backwardWord, true)
-
-EWOM.defineKey(EWOM.cxMap, { 'ctrl' }, '9', EWOM.cmd.kmacroStart)
-EWOM.defineKey(EWOM.cxMap, { 'ctrl' }, '0', EWOM.cmd.kmacroEnd)
-EWOM.defineKey(EWOM.cxMap, { 'ctrl' }, 'm', EWOM.cmd.kmacroCall)
-EWOM.defineKey(EWOM.cxMap, { 'ctrl' }, 's', EWOM.cmd.saveBuffer)
+-- You may also remap some keybinds as you want
+-- ↓ EWOM equivalent of (global-set-key (kbd "C--") 'undo)
+EWOM.globalSetKey({ 'ctrl' }, '-', EWOM.cmd.undo)
 ```

@@ -1,3 +1,6 @@
+-- TODO: State indicators (see canvas doc)
+-- TODO: Kill-ring history (C-2 C-y)
+
 local obj = {};
 
 --
@@ -577,6 +580,144 @@ end
 
 function obj.cmd.saveBuffer ()
   obj.sendKey({ 'cmd' }, 's')
+end
+
+--
+-- Keymap
+--
+
+function obj.registerDefaultKeymap ()
+  -- Reference: `emacs -Q` then `M-x describe-keymap global-map`
+
+  -- Plain
+  obj.globalSetKey({}, '`', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '1', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '2', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '3', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '4', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '5', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '6', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '7', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '8', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '9', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '0', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '-', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '=', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'q', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'w', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'e', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'r', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 't', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'y', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'u', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'i', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'o', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'p', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '[', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, ']', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'a', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 's', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'd', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'f', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'g', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'h', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'j', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'k', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'l', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, ';', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '\'', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '\\', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'z', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'x', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'c', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'v', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'b', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'n', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'm', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, ',', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '.', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, '/', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'space', obj.cmd.selfInsertCommand)
+  obj.globalSetKey({}, 'tab', obj.cmd.indentForTab)
+  obj.globalSetKey({}, 'return', obj.cmd.newline)
+  obj.globalSetKey({}, 'escape', obj.cmd.selfSendCommand)
+
+  -- S-*
+
+  -- C-*
+  obj.globalSetKey({ 'ctrl' }, '`', obj.cmd.ignore)
+  obj.globalSetKey({ 'ctrl' }, '1', obj.cmd.digitArgument)
+  obj.globalSetKey({ 'ctrl' }, '2', obj.cmd.digitArgument)
+  obj.globalSetKey({ 'ctrl' }, '3', obj.cmd.digitArgument)
+  obj.globalSetKey({ 'ctrl' }, '4', obj.cmd.digitArgument)
+  obj.globalSetKey({ 'ctrl' }, '5', obj.cmd.digitArgument)
+  obj.globalSetKey({ 'ctrl' }, '6', obj.cmd.digitArgument)
+  obj.globalSetKey({ 'ctrl' }, '7', obj.cmd.digitArgument)
+  obj.globalSetKey({ 'ctrl' }, '8', obj.cmd.digitArgument)
+  obj.globalSetKey({ 'ctrl' }, '9', obj.cmd.digitArgument)
+  obj.globalSetKey({ 'ctrl' }, '0', obj.cmd.digitArgument)
+  obj.globalSetKey({ 'ctrl' }, '-', obj.cmd.unsupported("negativeArgument"))
+  obj.globalSetKey({ 'ctrl' }, '=', obj.cmd.ignore)
+  obj.globalSetKey({ 'ctrl' }, 'q', obj.cmd.unsupported("quotedInsert"))
+  obj.globalSetKey({ 'ctrl' }, 'w', obj.cmd.killRegion)
+  obj.globalSetKey({ 'ctrl' }, 'e', obj.cmd.endOfLine)
+  obj.globalSetKey({ 'ctrl' }, 'r', obj.cmd.unsupported("isearchBackward"))
+  obj.globalSetKey({ 'ctrl' }, 't', obj.cmd.unsupported("transposeChars"))
+  obj.globalSetKey({ 'ctrl' }, 'y', obj.cmd.yank)
+  obj.globalSetKey({ 'ctrl' }, 'u', obj.cmd.unsupported("universalArgument"))
+  obj.globalSetKey({ 'ctrl' }, 'i', obj.cmd.indentForTab, true)
+  obj.globalSetKey({ 'ctrl' }, 'o', obj.cmd.openLine, true)
+  obj.globalSetKey({ 'ctrl' }, 'p', obj.cmd.previousLine)
+  obj.globalSetKey({ 'ctrl' }, '[', obj.cmd.ignore)
+  obj.globalSetKey({ 'ctrl' }, ']', obj.cmd.unsupported("abortRecursiveEdit"))
+  obj.globalSetKey({ 'ctrl' }, 'a', obj.cmd.beginningOfLine)
+  obj.globalSetKey({ 'ctrl' }, 's', obj.cmd.isearch)
+  obj.globalSetKey({ 'ctrl' }, 'd', obj.cmd.deleteChar, true)
+  obj.globalSetKey({ 'ctrl' }, 'f', obj.cmd.forwardChar, true)
+  obj.globalSetKey({ 'ctrl' }, 'g', obj.cmd.keyboardQuit)
+  obj.globalSetKey({ 'ctrl' }, 'h', obj.cmd.deleteBackwardChar, true)
+  obj.globalSetKey({ 'ctrl' }, 'j', obj.cmd.newline, true)
+  obj.globalSetKey({ 'ctrl' }, 'k', obj.cmd.killLine)
+  obj.globalSetKey({ 'ctrl' }, 'l', obj.cmd.unsupported("recenterTopBottom"))
+  obj.globalSetKey({ 'ctrl' }, ';', obj.cmd.ignore)
+  obj.globalSetKey({ 'ctrl' }, '\'', obj.cmd.ignore)
+  obj.globalSetKey({ 'ctrl' }, '\\', obj.cmd.toggleInputMethod)
+  obj.globalSetKey({ 'ctrl' }, 'z', obj.cmd.suspendFrame)
+  obj.globalSetKey({ 'ctrl' }, 'x', obj.cmd.cx)
+  obj.globalSetKey({ 'ctrl' }, 'c', obj.cmd.ignore)
+  obj.globalSetKey({ 'ctrl' }, 'v', obj.cmd.scrollUp, true)
+  obj.globalSetKey({ 'ctrl' }, 'b', obj.cmd.backwardChar, true)
+  obj.globalSetKey({ 'ctrl' }, 'n', obj.cmd.nextLine, true)
+  obj.globalSetKey({ 'ctrl' }, 'm', obj.cmd.newline)
+  obj.globalSetKey({ 'ctrl' }, ',', obj.cmd.ignore)
+  obj.globalSetKey({ 'ctrl' }, '.', obj.cmd.ignore)
+  obj.globalSetKey({ 'ctrl' }, '/', obj.cmd.undo)
+  obj.globalSetKey({ 'ctrl' }, 'space', obj.cmd.setMarkCommand)
+  obj.globalSetKey({ 'ctrl' }, 'tab', obj.cmd.ignore)
+  obj.globalSetKey({ 'ctrl' }, 'return', obj.cmd.ignore)
+  obj.globalSetKey({ 'ctrl' }, 'escape', obj.cmd.ignore)
+
+  -- C-S-*
+
+  -- C-M-*
+  obj.globalSetKey({ 'command', 'ctrl' }, 'f', obj.cmd.forwardWord, true)
+  obj.globalSetKey({ 'command', 'ctrl' }, 'b', obj.cmd.backwardWord, true)
+
+  -- C-M-S-*
+
+  -- C-x *
+
+  -- C-x S-*
+
+  -- C-x C-*
+  obj.defineKey(obj.cxMap, { 'ctrl' }, '9', obj.cmd.kmacroStart)
+  obj.defineKey(obj.cxMap, { 'ctrl' }, '0', obj.cmd.kmacroEnd)
+  obj.defineKey(obj.cxMap, { 'ctrl' }, 'm', obj.cmd.kmacroCall)
+  obj.defineKey(obj.cxMap, { 'ctrl' }, 's', obj.cmd.saveBuffer)
+
+  -- C-x C-M-*
+
+  -- C-x C-M-S-*
 end
 
 return obj
