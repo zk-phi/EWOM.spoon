@@ -4,11 +4,11 @@ local obj = {};
 -- Metadata
 --
 
-obj.name = "EWOM Spoon"
-obj.version = "0.1"
-obj.author = "zk-phi"
-obj.license = "MIT"
-obj.homepage = "https://github.com/zk-phi/dotfiles"
+obj.name = 'EWOM Spoon'
+obj.version = '0.1'
+obj.author = 'zk-phi'
+obj.license = 'MIT'
+obj.homepage = 'https://github.com/zk-phi/dotfiles'
 
 --
 -- Hooks
@@ -131,7 +131,7 @@ obj.watchers[#obj.watchers + 1] = hs.eventtap.new(
 function obj:maybeDisableOverlayMap ()
   if obj.overlayMap then
     obj.overlayMap = nil
-    -- hs.alert("Prefix cleared")
+    -- hs.alert('Prefix cleared')
   end
 end
 
@@ -159,7 +159,7 @@ obj.markActive = false
 
 local function maybeResetMark ()
   if obj.markActive then
-    hs.alert("Mark disabled")
+    hs.alert('Mark disabled')
     obj.markActive = false
   end
 end
@@ -174,7 +174,7 @@ obj:addHook(obj.afterChangeHook, maybeResetMark)
 obj.cxMap = hs.hotkey.modal.new()
 
 function obj:cx ()
-  hs.alert("C-x")
+  hs.alert('C-x')
   obj:enableOverlayMap(obj.cxMap)
 end
 
@@ -187,7 +187,7 @@ obj:addHook(
   obj.postCommandHook,
   function ()
     if obj.digitArgumentValue > 0 then
-      hs.alert("Digit-argument cleared")
+      hs.alert('Digit-argument cleared')
     end
     obj.digitArgumentValue = 0
   end
@@ -219,14 +219,14 @@ function obj:kmacroStart ()
   obj:runHooks(obj.preCommandHook)
   obj.kmacroRecording = true
   obj.kmacro = {}
-  hs.alert("Macro recording ...")
+  hs.alert('Macro recording ...')
   obj:runHooks(obj.postCommandHook)
 end
 
 function obj:kmacroEnd ()
   obj:runHooks(obj.preCommandHook)
   obj.kmacroRecording = false
-  hs.alert("Macro recorded")
+  hs.alert('Macro recorded')
   obj:runHooks(obj.postCommandHook)
 end
 
@@ -246,7 +246,7 @@ end
 
 function obj:setMarkCommand ()
   obj:runHooks(obj.preCommandHook)
-  hs.alert("Mark enabled")
+  hs.alert('Mark enabled')
   obj.markActive = true
   obj:runHooks(obj.postCommandHook)
 end
@@ -254,7 +254,7 @@ end
 function obj:keyboardQuit ()
   obj:runHooks(obj.preCommandHook)
   if obj.markActive then
-    hs.alert("Mark disabled")
+    hs.alert('Mark disabled')
     obj.markActive = false
   end
   obj:runHooks(obj.postCommandHook)
