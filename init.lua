@@ -261,6 +261,10 @@ function obj.cmd.kmacroEnd ()
 end
 
 function obj.cmd.kmacroCall (arg)
+  if obj.kmacroRecording then
+    hs.alert('ERROR: Macro is recording')
+    return
+  end
   for i = 1, math.max(1, arg) do
     for j = 1, #obj.kmacro do
       obj.sendKey(obj.kmacro[j][1], obj.kmacro[j][2])
