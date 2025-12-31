@@ -247,13 +247,13 @@ end
 
 function obj.cmd.restricted (cmdName)
   return function ()
-    hs.alert(cmdName .. ' is restricted in this keymap')
+    hs.alert('"' .. cmdName .. '" is restricted in this keymap')
   end
 end
 
-function obj.cmd.notImplemented (cmdName)
+function obj.cmd.unsupported (cmdName)
   return function ()
-    hs.alert(cmdName .. ' is not implemented')
+    hs.alert('"' .. cmdName .. '" is unsupported for now')
   end
 end
 
