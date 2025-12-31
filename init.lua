@@ -18,11 +18,11 @@ obj.preCommandHook = {}
 obj.postCommandHook = {}
 obj.afterChangeHook = {}
 
-function obj:addHook (hook, fn)
+function obj.addHook (hook, fn)
   hook[#hook + 1] = fn
 end
 
-function obj:runHooks (hook, arg)
+function obj.runHooks (hook, arg)
   for i = 1, #hook do
     hook[i](arg)
   end
@@ -40,7 +40,7 @@ obj.watchers = {}
 obj.watchers[#obj.watchers + 1] = hs.application.watcher.new(
   function (app, event)
     if event == hs.application.watcher.activated then
-      obj:runHooks(obj.afterFocusChangeHook, app)
+      obj.runHooks(obj.afterFocusChangeHook, app)
     end
   end
 ):start()
@@ -57,11 +57,11 @@ obj.afterSendHook = {}
 -- Like fs.eventtap.keyStroke but faster
 -- https://github.com/Hammerspoon/hammerspoon/issues/1082
 function sendKey (mod, char)
-  obj:runHooks(obj.beforeSendHook)
+  obj.runHooks(obj.beforeSendHook)
   obj.lastSentKey = { mod, char }
   hs.eventtap.event.newKeyEvent(mod, char, true):post()
   hs.eventtap.event.newKeyEvent(mod, char, false):post()
-  obj:runHooks(obj.afterSendHook)
+  obj.runHooks(obj.afterSendHook)
 end
 
 --
@@ -89,7 +89,7 @@ obj.MODFLAGS =
   hs.eventtap.event.rawFlagMasks.deviceRightControl |
   hs.eventtap.event.rawFlagMasks.deviceRightShift
 
-function obj:defineKey (map, mods, char, fn, repeatable)
+function obj.defineKey (map, mods, char, fn, repeatable)
   local e = hs.eventtap.event.newKeyEvent(mods, char, true)
   local code = e:getKeyCode()
   local flags = e:rawFlags() & obj.MODFLAGS
@@ -128,28 +128,28 @@ obj.watchers[#obj.watchers + 1] = hs.eventtap.new(
   end
 ):start()
 
-function obj:maybeDisableOverlayMap ()
+function obj.maybeDisableOverlayMap ()
   if obj.overlayMap then
     obj.overlayMap = nil
     -- hs.alert('Prefix cleared')
   end
 end
 
-function obj:enableOverlayMap (map)
-  obj:maybeDisableOverlayMap()
+function obj.enableOverlayMap (map)
+  obj.maybeDisableOverlayMap()
   obj.overlayMap = map
 end
 
-function obj:disableKeyBindings ()
+function obj.disableKeyBindings ()
   obj.enabled = false
 end
 
-function obj:enableKeyBindings ()
+function obj.enableKeyBindings ()
   obj.enabled = true
 end
 
-obj:addHook(obj.afterFocusChangeHook, obj.maybeDisableOverlayMap)
-obj:addHook(obj.postCommandHook, obj.maybeDisableOverlayMap)
+obj.addHook(obj.afterFocusChangeHook, obj.maybeDisableOverlayMap)
+obj.addHook(obj.postCommandHook, obj.maybeDisableOverlayMap)
 
 --
 -- Mark
@@ -164,8 +164,8 @@ local function maybeResetMark ()
   end
 end
 
-obj:addHook(obj.afterFocusChangeHook, maybeResetMark)
-obj:addHook(obj.afterChangeHook, maybeResetMark)
+obj.addHook(obj.afterFocusChangeHook, maybeResetMark)
+obj.addHook(obj.afterChangeHook, maybeResetMark)
 
 --
 -- cx
@@ -173,9 +173,9 @@ obj:addHook(obj.afterChangeHook, maybeResetMark)
 
 obj.cxMap = hs.hotkey.modal.new()
 
-function obj:cx ()
+function obj.cx ()
   hs.alert('C-x')
-  obj:enableOverlayMap(obj.cxMap)
+  obj.enableOverlayMap(obj.cxMap)
 end
 
 --
@@ -191,14 +191,14 @@ local function maybeClearDigitArgument ()
   obj.digitArgumentValue = 0
 end
 
-function obj:digitArgument ()
+function obj.digitArgument ()
   local digit = tonumber(obj.lastKeyDown)
   obj.digitArgumentValue = obj.digitArgumentValue * 10 + digit
   hs.alert(obj.digitArgumentValue)
 end
 
-obj:addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
-obj:addHook(obj.postCommandHook, maybeClearDigitArgument)
+obj.addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
+obj.addHook(obj.postCommandHook, maybeClearDigitArgument)
 
 --
 -- Keyboard macro
@@ -207,7 +207,7 @@ obj:addHook(obj.postCommandHook, maybeClearDigitArgument)
 obj.kmacroRecording = false
 obj.kmacro = {}
 
-obj:addHook(
+obj.addHook(
   obj.afterSendHook,
   function ()
     if obj.kmacroRecording then
@@ -216,44 +216,44 @@ obj:addHook(
   end
 )
 
-function obj:kmacroStart ()
-  obj:runHooks(obj.preCommandHook)
+function obj.kmacroStart ()
+  obj.runHooks(obj.preCommandHook)
   obj.kmacroRecording = true
   obj.kmacro = {}
   hs.alert('Macro recording ...')
-  obj:runHooks(obj.postCommandHook)
+  obj.runHooks(obj.postCommandHook)
 end
 
-function obj:kmacroEnd ()
-  obj:runHooks(obj.preCommandHook)
+function obj.kmacroEnd ()
+  obj.runHooks(obj.preCommandHook)
   obj.kmacroRecording = false
   hs.alert('Macro recorded')
-  obj:runHooks(obj.postCommandHook)
+  obj.runHooks(obj.postCommandHook)
 end
 
-function obj:kmacroCall ()
-  obj:runHooks(obj.preCommandHook)
+function obj.kmacroCall ()
+  obj.runHooks(obj.preCommandHook)
   for i = 1, math.max(1, obj.digitArgumentValue) do
     for j = 1, #obj.kmacro do
       sendKey(obj.kmacro[j][1], obj.kmacro[j][2])
     end
   end
-  obj:runHooks(obj.postCommandHook)
+  obj.runHooks(obj.postCommandHook)
 end
 
 --
 -- Commands
 --
 
-function obj:setMarkCommand ()
-  obj:runHooks(obj.preCommandHook)
+function obj.setMarkCommand ()
+  obj.runHooks(obj.preCommandHook)
   hs.alert('Mark enabled')
   obj.markActive = true
-  obj:runHooks(obj.postCommandHook)
+  obj.runHooks(obj.postCommandHook)
 end
 
-function obj:keyboardQuit ()
-  obj:runHooks(obj.preCommandHook)
+function obj.keyboardQuit ()
+  obj.runHooks(obj.preCommandHook)
   if (not obj.markActive) and (not obj.overlayMap) and obj.digitArgumentValue == 0 then
     -- nothing to clear => just send ESC
     sendKey({}, 'esc')
@@ -261,21 +261,21 @@ function obj:keyboardQuit ()
     hs.alert('Mark disabled')
     obj.markActive = false
   end
-  obj:runHooks(obj.postCommandHook)
+  obj.runHooks(obj.postCommandHook)
 end
 
-function obj:selfInsertCommand ()
-  obj:runHooks(obj.preCommandHook)
+function obj.selfInsertCommand ()
+  obj.runHooks(obj.preCommandHook)
   local ch = obj.lastKeyDown
   for i = 1, math.max(1, obj.digitArgumentValue) do
     sendKey({}, ch)
   end
-  obj:runHooks(obj.afterChangeHook)
-  obj:runHooks(obj.postCommandHook)
+  obj.runHooks(obj.afterChangeHook)
+  obj.runHooks(obj.postCommandHook)
 end
 
-function obj:backwardChar ()
-  obj:runHooks(obj.preCommandHook)
+function obj.backwardChar ()
+  obj.runHooks(obj.preCommandHook)
   for i = 1, math.max(1, obj.digitArgumentValue) do
     if obj.markActive then
       sendKey({ 'shift' }, 'left')
@@ -283,11 +283,11 @@ function obj:backwardChar ()
       sendKey({}, 'left')
     end
   end
-  obj:runHooks(obj.postCommandHook)
+  obj.runHooks(obj.postCommandHook)
 end
 
-function obj:forwardChar ()
-  obj:runHooks(obj.preCommandHook)
+function obj.forwardChar ()
+  obj.runHooks(obj.preCommandHook)
   for i = 1, math.max(1, obj.digitArgumentValue) do
     if obj.markActive then
       sendKey({ 'shift' }, 'right')
@@ -295,11 +295,11 @@ function obj:forwardChar ()
       sendKey({}, 'right')
     end
   end
-  obj:runHooks(obj.postCommandHook)
+  obj.runHooks(obj.postCommandHook)
 end
 
-function obj:previousLine ()
-  obj:runHooks(obj.preCommandHook)
+function obj.previousLine ()
+  obj.runHooks(obj.preCommandHook)
   for i = 1, math.max(1, obj.digitArgumentValue) do
     if obj.markActive then
       sendKey({ 'shift' }, 'up')
@@ -307,11 +307,11 @@ function obj:previousLine ()
       sendKey({}, 'up')
     end
   end
-  obj:runHooks(obj.postCommandHook)
+  obj.runHooks(obj.postCommandHook)
 end
 
-function obj:nextLine ()
-  obj:runHooks(obj.preCommandHook)
+function obj.nextLine ()
+  obj.runHooks(obj.preCommandHook)
   for i = 1, math.max(1, obj.digitArgumentValue) do
     if obj.markActive then
       sendKey({ 'shift' }, 'down')
@@ -319,11 +319,11 @@ function obj:nextLine ()
       sendKey({}, 'down')
     end
   end
-  obj:runHooks(obj.postCommandHook)
+  obj.runHooks(obj.postCommandHook)
 end
 
-function obj:forwardWord ()
-  obj:runHooks(obj.preCommandHook)
+function obj.forwardWord ()
+  obj.runHooks(obj.preCommandHook)
   for i = 1, math.max(1, obj.digitArgumentValue) do
     if obj.markActive then
       sendKey({ 'shift', 'option' }, 'right')
@@ -331,11 +331,11 @@ function obj:forwardWord ()
       sendKey({ 'option' }, 'right')
     end
   end
-  obj:runHooks(obj.postCommandHook)
+  obj.runHooks(obj.postCommandHook)
 end
 
-function obj:backwardWord ()
-  obj:runHooks(obj.preCommandHook)
+function obj.backwardWord ()
+  obj.runHooks(obj.preCommandHook)
   for i = 1, math.max(1, obj.digitArgumentValue) do
     if obj.markActive then
       sendKey({ 'shift', 'option' }, 'left')
@@ -343,13 +343,13 @@ function obj:backwardWord ()
       sendKey({ 'option' }, 'left')
     end
   end
-  obj:runHooks(obj.postCommandHook)
+  obj.runHooks(obj.postCommandHook)
 end
 
-function obj:saveBuffer ()
-  obj:runHooks(obj.preCommandHook)
+function obj.saveBuffer ()
+  obj.runHooks(obj.preCommandHook)
   sendKey({ 'cmd' }, 's')
-  obj:runHooks(obj.postCommandHook)
+  obj.runHooks(obj.postCommandHook)
 end
 
 return obj
