@@ -254,11 +254,12 @@ end
 
 function obj:keyboardQuit ()
   obj:runHooks(obj.preCommandHook)
-  if obj.markActive then
+  if (not obj.markActive) and (not obj.overlayMap) obj.digitArgumentValue == 0 then
+    -- nothing to clear => just send ESC
+    sendKey({}, 'esc')
+  elseif obj.markActive then
     hs.alert('Mark disabled')
     obj.markActive = false
-  else
-    sendKey({}, 'esc')
   end
   obj:runHooks(obj.postCommandHook)
 end
