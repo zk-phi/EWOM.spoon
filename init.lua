@@ -121,14 +121,18 @@ obj.addHook(obj.afterFocusChangeHook, maybeDisableOverlayMap)
 
 -- enabled
 
+obj.keybindsDisabledHook = {}
+obj.keybindsEnabledHook = {}
 obj.enabled = true
 
 function obj.disableKeyBindings ()
   obj.enabled = false
+  obj.runHooks(obj.keybindsDisabledHook)
 end
 
 function obj.enableKeyBindings ()
   obj.enabled = true
+  obj.runHooks(obj.keybindsEnabledHook)
 end
 
 -- digit argument
@@ -260,6 +264,9 @@ function obj.cmd.kmacroCall (arg)
     end
   end
 end
+
+-- kmacro can be defined across applications, except for disabled ones
+obj.addHook(obj.keybindsDisabledHook, obj.cmd.kmacroEnd)
 
 --
 -- Commands
