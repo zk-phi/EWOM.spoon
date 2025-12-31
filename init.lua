@@ -45,19 +45,16 @@ obj._watchers[#obj._watchers + 1] = hs.application.watcher.new(
 -- sendKey
 --
 
-obj.lastSentKey = nil
-
 obj.beforeSendHook = {}
 obj.afterSendHook = {}
 
 -- Like fs.eventtap.keyStroke but faster
 -- https://github.com/Hammerspoon/hammerspoon/issues/1082
 function sendKey (mod, char)
-  obj.runHooks(obj.beforeSendHook)
-  obj.lastSentKey = { mod, char }
+  obj.runHooks(obj.beforeSendHook, { mod, char })
   hs.eventtap.event.newKeyEvent(mod, char, true):post()
   hs.eventtap.event.newKeyEvent(mod, char, false):post()
-  obj.runHooks(obj.afterSendHook)
+  obj.runHooks(obj.afterSendHook, { mod, char })
 end
 
 --
@@ -225,9 +222,9 @@ obj.kmacro = {}
 
 obj.addHook(
   obj.afterSendHook,
-  function ()
+  function (key)
     if obj.kmacroRecording then
-      obj.kmacro[#obj.kmacro + 1] = obj.lastSentKey
+      obj.kmacro[#obj.kmacro + 1] = key
     end
   end
 )
