@@ -175,17 +175,6 @@ obj.addHook(obj.afterFocusChangeHook, maybeResetMark)
 obj.addHook(obj.afterChangeHook, maybeResetMark)
 
 --
--- cx
---
-
-obj.cxMap = hs.hotkey.modal.new()
-
-function obj.cmd.cx ()
-  hs.alert('C-x')
-  obj.enableOverlayMap(obj.cxMap)
-end
-
---
 -- Digit arguments
 --
 
@@ -212,6 +201,18 @@ end
 
 obj.addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
 obj.addHook(obj.preCommandHook, fetchDigitArgument)
+
+--
+-- cx
+--
+
+obj.cxMap = hs.hotkey.modal.new()
+
+function obj.cmd.cx ()
+  pendingDigitArgument = obj.digitArgument
+  obj.enableOverlayMap(obj.cxMap)
+  hs.alert('C-x')
+end
 
 --
 -- Keyboard macro
