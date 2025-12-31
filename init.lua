@@ -30,10 +30,10 @@ end
 
 obj.afterFocusChangeHook = {}
 
--- We need to bind allocated watcher unless otherwise it will be garbage-collected.
+-- We need to bind allocated watcher globally unless otherwise it will be garbage-collected.
 -- https://github.com/Hammerspoon/hammerspoon/issues/681#issuecomment-178420569
-obj.watchers = {}
-obj.watchers[#obj.watchers + 1] = hs.application.watcher.new(
+obj._watchers = {}
+obj._watchers[#obj._watchers + 1] = hs.application.watcher.new(
   function (app, event)
     if event == hs.application.watcher.activated then
       obj.runHooks(obj.afterFocusChangeHook, app)
@@ -103,7 +103,7 @@ local function lookupKey (map, evt)
   return flagsMap and flagsMap[evt:rawFlags() & obj.MODFLAGS]
 end
 
-obj.watchers[#obj.watchers + 1] = hs.eventtap.new(
+obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
   {hs.eventtap.event.types.keyDown},
   function (evt)
     obj.lastKeyDown = evt:getCharacters(true)
