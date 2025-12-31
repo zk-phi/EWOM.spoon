@@ -41,6 +41,11 @@ obj._watchers[#obj._watchers + 1] = hs.application.watcher.new(
   end
 ):start()
 
+function obj.setApplicationFilter (fn)
+  fn(hs.application.frontmostApplication():title())
+  obj.addHook(obj.afterFocusChangeHook, fn)
+end
+
 --
 -- sendKey
 --

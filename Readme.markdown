@@ -5,10 +5,9 @@ Sample `init.lua`:
 ``` lua
 local EWOM = hs.loadSpoon("EWOM")
 
-EWOM.addHook(
-  EWOM.afterFocusChangeHook,
+EWOM.setApplicationFilter(
   function (app)
-    if app == "Emacs" or app == "iTerm2" then
+    if app == 'Emacs' or app == 'iTerm2' then
       EWOM.disableKeyBindings()
     else
       EWOM.enableKeyBindings()
