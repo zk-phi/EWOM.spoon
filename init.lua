@@ -257,6 +257,8 @@ function obj:keyboardQuit ()
   if obj.markActive then
     hs.alert('Mark disabled')
     obj.markActive = false
+  else
+    sendKey({}, 'esc')
   end
   obj:runHooks(obj.postCommandHook)
 end
