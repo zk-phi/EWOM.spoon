@@ -254,7 +254,7 @@ end
 
 function obj:keyboardQuit ()
   obj:runHooks(obj.preCommandHook)
-  if (not obj.markActive) and (not obj.overlayMap) obj.digitArgumentValue == 0 then
+  if (not obj.markActive) and (not obj.overlayMap) and obj.digitArgumentValue == 0 then
     -- nothing to clear => just send ESC
     sendKey({}, 'esc')
   elseif obj.markActive then
