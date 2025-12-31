@@ -269,6 +269,20 @@ function obj.cmd.digitArgument (arg, evt)
   hs.alert('C-' .. val)
 end
 
+function obj.cmd.keyboardQuit ()
+  -- Disable mark (note that arg and overlayMap are disabled automatically)
+  if obj.markActive then
+    obj.markActive = false
+  end
+  -- Tap twice to send ESC
+  if obj.lastCommand == obj.cmd.keyboardQuit then
+    obj.sendKey({}, 'escape')
+    hs.alert('Esc')
+  else
+    hs.alert('Quit')
+  end
+end
+
 function obj.cmd.restricted (cmdName)
   return function ()
     hs.alert('"' .. cmdName .. '" is restricted in this keymap')
@@ -357,21 +371,7 @@ end
 -- kmacro can be defined across applications, except for disabled ones
 obj.addHook(obj.keybindsDisabledHook, obj.cmd.kmacroEnd)
 
--- Others
-
-function obj.cmd.keyboardQuit ()
-  -- Disable mark (note that arg and overlayMap are disabled automatically)
-  if obj.markActive then
-    obj.markActive = false
-  end
-  -- Tap twice to send ESC
-  if obj.lastCommand == obj.cmd.keyboardQuit then
-    obj.sendKey({}, 'escape')
-    hs.alert('Esc')
-  else
-    hs.alert('Quit')
-  end
-end
+-- Cursor
 
 function obj.cmd.backwardChar (arg)
   for i = 1, math.max(1, arg) do
