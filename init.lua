@@ -42,8 +42,28 @@ obj._watchers[#obj._watchers + 1] = hs.application.watcher.new(
 ):start()
 
 --
+-- sendKey
+--
+
+obj.beforeSendHook = {}
+obj.afterSendHook = {}
+
+-- Like fs.eventtap.keyStroke but faster
+-- https://github.com/Hammerspoon/hammerspoon/issues/1082
+function obj.sendKey (mod, char)
+  obj.runHooks(obj.beforeSendHook, { mod, char })
+  hs.eventtap.event.newKeyEvent(mod, char, true):post()
+  hs.eventtap.event.newKeyEvent(mod, char, false):post()
+  obj.runHooks(obj.afterSendHook, { mod, char })
+end
+
+--
 -- Keymap lookup
 --
+
+-- hs.hotkey can be fired with synthetic keyboard event too,
+-- which easily leads to infinite recursion. so implement by our own
+-- https://github.com/Hammerspoon/hammerspoon/issues/1230
 
 obj.globalMap = {}
 obj.overlayMap = nil
@@ -96,39 +116,42 @@ end
 obj.addHook(obj.afterFocusChangeHook, maybeDisableOverlayMap)
 
 --
--- sendKey
---
-
-obj.beforeSendHook = {}
-obj.afterSendHook = {}
-
--- Like fs.eventtap.keyStroke but faster
--- https://github.com/Hammerspoon/hammerspoon/issues/1082
-function obj.sendKey (mod, char)
-  obj.runHooks(obj.beforeSendHook, { mod, char })
-  hs.eventtap.event.newKeyEvent(mod, char, true):post()
-  hs.eventtap.event.newKeyEvent(mod, char, false):post()
-  obj.runHooks(obj.afterSendHook, { mod, char })
-end
-
---
 -- The Core
 --
 
--- hs.hotkey can be fired with synthetic keyboard event too,
--- which easily leads to infinite recursion. so implement by our own
--- https://github.com/Hammerspoon/hammerspoon/issues/1230
-
-obj.preCommandHook = {}
-obj.postCommandHook = {}
+-- enabled
 
 obj.enabled = true
+
+function obj.disableKeyBindings ()
+  obj.enabled = false
+end
+
+function obj.enableKeyBindings ()
+  obj.enabled = true
+end
+
+-- digit argument
 
 local nextDigitArgument = 0
 
 function obj.setDigitArgument (val)
   nextDigitArgument = val
 end
+
+local function maybeClearDigitArgument ()
+  if nextDigitArgument > 0 then
+    nextDigitArgument = 0
+    hs.alert("Argument cleared")
+  end
+end
+
+obj.addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
+
+-- the event loop
+
+obj.preCommandHook = {}
+obj.postCommandHook = {}
 
 obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
   {hs.eventtap.event.types.keyDown},
@@ -157,14 +180,6 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
   end
 ):start()
 
-function obj.disableKeyBindings ()
-  obj.enabled = false
-end
-
-function obj.enableKeyBindings ()
-  obj.enabled = true
-end
-
 --
 -- Commands
 --
@@ -192,21 +207,12 @@ obj.addHook(obj.afterChangeHook, maybeResetMark)
 -- Digit arguments
 --
 
-local function maybeClearDigitArgument ()
-  if nextDigitArgument > 0 then
-    nextDigitArgument = 0
-    hs.alert("Argument cleared")
-  end
-end
-
 function obj.cmd.digitArgument (arg, key)
   local digit = tonumber(key)
   local val = arg * 10 + digit
   obj.setDigitArgument(val)
   hs.alert(val)
 end
-
-obj.addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
 
 --
 -- cx
@@ -272,6 +278,7 @@ function obj.cmd.keyboardQuit (arg)
     hs.alert('Mark disabled')
     obj.markActive = false
   end
+  -- overlayMap and arg will be cleared automatically
 end
 
 function obj.cmd.selfInsertCommand (arg, key)
