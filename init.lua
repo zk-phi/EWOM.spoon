@@ -50,7 +50,7 @@ obj.afterSendHook = {}
 
 -- Like fs.eventtap.keyStroke but faster
 -- https://github.com/Hammerspoon/hammerspoon/issues/1082
-function sendKey (mod, char)
+function obj.sendKey (mod, char)
   obj.runHooks(obj.beforeSendHook, { mod, char })
   hs.eventtap.event.newKeyEvent(mod, char, true):post()
   hs.eventtap.event.newKeyEvent(mod, char, false):post()
@@ -83,6 +83,20 @@ obj.MODFLAGS =
   hs.eventtap.event.rawFlagMasks.deviceRightControl |
   hs.eventtap.event.rawFlagMasks.deviceRightShift
 
+function obj.enableOverlayMap (map)
+  maybeDisableOverlayMap()
+  obj.overlayMap = map
+end
+
+local function maybeDisableOverlayMap (silent)
+  if obj.overlayMap then
+    obj.overlayMap = nil
+    if not silent then
+      hs.alert('Prefix cleared')
+    end
+  end
+end
+
 function obj.defineKey (map, mods, char, fn, repeatable)
   local e = hs.eventtap.event.newKeyEvent(mods, char, true)
   local code = e:getKeyCode()
@@ -110,7 +124,7 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
       return false
     end
     local entry = lookupKey(obj.overlayMap, evt) or lookupKey(obj.globalMap, evt)
-    obj.maybeDisableOverlayMap(entry)
+    maybeDisableOverlayMap(entry)
     if not entry then
       return false
     end
@@ -124,20 +138,6 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
   end
 ):start()
 
-function obj.maybeDisableOverlayMap (silent)
-  if obj.overlayMap then
-    obj.overlayMap = nil
-    if not silent then
-      hs.alert('Prefix cleared')
-    end
-  end
-end
-
-function obj.enableOverlayMap (map)
-  obj.maybeDisableOverlayMap()
-  obj.overlayMap = map
-end
-
 function obj.disableKeyBindings ()
   obj.enabled = false
 end
@@ -146,7 +146,7 @@ function obj.enableKeyBindings ()
   obj.enabled = true
 end
 
-obj.addHook(obj.afterFocusChangeHook, obj.maybeDisableOverlayMap)
+obj.addHook(obj.afterFocusChangeHook, maybeDisableOverlayMap)
 
 --
 -- Commands
@@ -175,25 +175,25 @@ obj.addHook(obj.afterChangeHook, maybeResetMark)
 -- Digit arguments
 --
 
-local pendingDigitArgument = 0
+obj.pendingDigitArgument = 0
 obj.digitArgument = 0
 
 local function maybeClearDigitArgument ()
-  if pendingDigitArgument > 0 then
-    pendingDigitArgument = 0
+  if obj.pendingDigitArgument > 0 then
+    obj.pendingDigitArgument = 0
     hs.alert("Argument cleared")
   end
 end
 
 local function fetchDigitArgument ()
-  obj.digitArgument = pendingDigitArgument
-  pendingDigitArgument = 0
+  obj.digitArgument = obj.pendingDigitArgument
+  obj.pendingDigitArgument = 0
 end
 
 function obj.cmd.digitArgument (key)
   local digit = tonumber(key)
-  pendingDigitArgument = obj.digitArgument * 10 + digit
-  hs.alert(pendingDigitArgument)
+  obj.pendingDigitArgument = obj.digitArgument * 10 + digit
+  hs.alert(obj.pendingDigitArgument)
 end
 
 obj.addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
@@ -206,7 +206,7 @@ obj.addHook(obj.preCommandHook, fetchDigitArgument)
 obj.cxMap = hs.hotkey.modal.new()
 
 function obj.cmd.cx ()
-  pendingDigitArgument = obj.digitArgument
+  obj.pendingDigitArgument = obj.digitArgument
   obj.enableOverlayMap(obj.cxMap)
   hs.alert('C-x')
 end
@@ -241,7 +241,7 @@ end
 function obj.cmd.kmacroCall ()
   for i = 1, math.max(1, obj.digitArgument) do
     for j = 1, #obj.kmacro do
-      sendKey(obj.kmacro[j][1], obj.kmacro[j][2])
+      obj.sendKey(obj.kmacro[j][1], obj.kmacro[j][2])
     end
   end
 end
@@ -258,7 +258,7 @@ end
 function obj.cmd.keyboardQuit ()
   if (not obj.markActive) and (not obj.overlayMap) and obj.digitArgument == 0 then
     -- nothing to clear => just send ESC
-    sendKey({}, 'esc')
+    obj.sendKey({}, 'esc')
   elseif obj.markActive then
     hs.alert('Mark disabled')
     obj.markActive = false
@@ -267,7 +267,7 @@ end
 
 function obj.cmd.selfInsertCommand (key)
   for i = 1, math.max(1, obj.digitArgument) do
-    sendKey({}, key)
+    obj.sendKey({}, key)
   end
   obj.runHooks(obj.afterChangeHook)
 end
@@ -275,9 +275,9 @@ end
 function obj.cmd.backwardChar ()
   for i = 1, math.max(1, obj.digitArgument) do
     if obj.markActive then
-      sendKey({ 'shift' }, 'left')
+      obj.sendKey({ 'shift' }, 'left')
     else
-      sendKey({}, 'left')
+      obj.sendKey({}, 'left')
     end
   end
 end
@@ -285,9 +285,9 @@ end
 function obj.cmd.forwardChar ()
   for i = 1, math.max(1, obj.digitArgument) do
     if obj.markActive then
-      sendKey({ 'shift' }, 'right')
+      obj.sendKey({ 'shift' }, 'right')
     else
-      sendKey({}, 'right')
+      obj.sendKey({}, 'right')
     end
   end
 end
@@ -295,9 +295,9 @@ end
 function obj.cmd.previousLine ()
   for i = 1, math.max(1, obj.digitArgument) do
     if obj.markActive then
-      sendKey({ 'shift' }, 'up')
+      obj.sendKey({ 'shift' }, 'up')
     else
-      sendKey({}, 'up')
+      obj.sendKey({}, 'up')
     end
   end
 end
@@ -305,9 +305,9 @@ end
 function obj.cmd.nextLine ()
   for i = 1, math.max(1, obj.digitArgument) do
     if obj.markActive then
-      sendKey({ 'shift' }, 'down')
+      obj.sendKey({ 'shift' }, 'down')
     else
-      sendKey({}, 'down')
+      obj.sendKey({}, 'down')
     end
   end
 end
@@ -315,9 +315,9 @@ end
 function obj.cmd.forwardWord ()
   for i = 1, math.max(1, obj.digitArgument) do
     if obj.markActive then
-      sendKey({ 'shift', 'option' }, 'right')
+      obj.sendKey({ 'shift', 'option' }, 'right')
     else
-      sendKey({ 'option' }, 'right')
+      obj.sendKey({ 'option' }, 'right')
     end
   end
 end
@@ -325,15 +325,15 @@ end
 function obj.cmd.backwardWord ()
   for i = 1, math.max(1, obj.digitArgument) do
     if obj.markActive then
-      sendKey({ 'shift', 'option' }, 'left')
+      obj.sendKey({ 'shift', 'option' }, 'left')
     else
-      sendKey({ 'option' }, 'left')
+      obj.sendKey({ 'option' }, 'left')
     end
   end
 end
 
 function obj.cmd.saveBuffer ()
-  sendKey({ 'cmd' }, 's')
+  obj.sendKey({ 'cmd' }, 's')
 end
 
 return obj
