@@ -5,23 +5,17 @@ Sample `init.lua`:
 ``` lua
 local EWOM = hs.loadSpoon("EWOM")
 
+-- Disable in some apps
 EWOM.setApplicationFilter(
   function (app)
-    if app == 'Emacs' or app == 'iTerm2' then
-      EWOM.disableKeyBindings()
-    else
-      EWOM.enableKeyBindings()
-    end
+    return app == 'Emacs' or app == 'iTerm2'
   end
 )
 
+-- Disable while input method is on
 EWOM.setInputMethodFilter(
   function (method)
-    if method == nil then
-      EWOM.enableKeyBindings()
-    else
-      EWOM.disableKeyBindings()
-    end
+    return not (method == nil)
   end
 )
 
