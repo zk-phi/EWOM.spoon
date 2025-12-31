@@ -231,6 +231,13 @@ function obj.cmd.selfInsertCommand (arg, evt)
   obj.runHooks(obj.afterChangeHook)
 end
 
+function obj.cmd.selfSendCommand (arg, evt)
+  -- Like selfInsertCommand, but does not invoke afterChangeHook
+  for i = 1, math.max(1, arg) do
+    sendSyntheticEvent(evt)
+  end
+end
+
 function obj.cmd.digitArgument (arg, evt)
   local digit = tonumber(evt:getCharacters(true))
   local val = arg * 10 + digit
