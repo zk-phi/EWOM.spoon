@@ -127,6 +127,10 @@ function obj.defineKey (map, mods, char, fn, repeatable)
   map[flags][code] = { fn, repeatable }
 end
 
+function obj.globalSetKey (mods, char, fn, repeatable)
+  obj.defineKey(obj.globalMap, mods, char, fn, repeatable)
+end
+
 local function maybeDisableOverlayMap (silent)
   if obj.overlayMap then
     obj.overlayMap = nil
