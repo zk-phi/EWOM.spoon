@@ -697,27 +697,37 @@ function obj.registerDefaultKeymap ()
   obj.globalSetKey({ 'ctrl' }, 'return', obj.cmd.ignore)
   obj.globalSetKey({ 'ctrl' }, 'escape', obj.cmd.ignore)
 
-  -- C-S-*
+  -- TODO: C-S-*
 
-  -- C-M-*
+  -- TODO: M-*
+
+  -- TODO: M-S-*
+
+  -- TODO: C-M-*
   obj.globalSetKey({ 'command', 'ctrl' }, 'f', obj.cmd.forwardWord, true)
   obj.globalSetKey({ 'command', 'ctrl' }, 'b', obj.cmd.backwardWord, true)
 
-  -- C-M-S-*
+  -- TODO: C-M-S-*
 
-  -- C-x *
+  -- TODO: C-x *
+  obj.defineKey(obj.cxMap, {}, 'e', obj.cmd.kmacroCall)
 
-  -- C-x S-*
+  -- TODO: C-x S-*
+  obj.defineKey(obj.cxMap, { 'shift' }, '9', obj.cmd.kmacroStart)
+  obj.defineKey(obj.cxMap, { 'shift' }, '0', obj.cmd.kmacroEnd)
 
-  -- C-x C-*
-  obj.defineKey(obj.cxMap, { 'ctrl' }, '9', obj.cmd.kmacroStart)
-  obj.defineKey(obj.cxMap, { 'ctrl' }, '0', obj.cmd.kmacroEnd)
-  obj.defineKey(obj.cxMap, { 'ctrl' }, 'm', obj.cmd.kmacroCall)
+  -- TODO: C-x C-*
   obj.defineKey(obj.cxMap, { 'ctrl' }, 's', obj.cmd.saveBuffer)
 
-  -- C-x C-M-*
+  -- TODO: C-x C-S-*
 
-  -- C-x C-M-S-*
+  -- TODO: C-x M-*
+
+  -- TODO: C-x M-S-*
+
+  -- TODO: C-x C-M-*
+
+  -- TODO: C-x C-M-S-*
 end
 
 return obj
