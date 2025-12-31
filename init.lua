@@ -41,11 +41,6 @@ obj._watchers[#obj._watchers + 1] = hs.application.watcher.new(
   end
 ):start()
 
-function obj.setApplicationFilter (fn)
-  fn(hs.application.frontmostApplication():title())
-  obj.addHook(obj.afterFocusChangeHook, fn)
-end
-
 --
 -- afterInputMethodChangeHook
 --
@@ -57,11 +52,6 @@ obj._watchers[#obj._watchers + 1] = hs.keycodes.inputSourceChanged(
     obj.runHooks(obj.afterInputMethodChangeHook, hs.keycodes.currentMethod())
   end
 )
-
-function obj.setInputMethodFilter (fn)
-  fn(hs.keycodes.currentMethod())
-  obj.addHook(obj.afterInputMethodChangeHook, fn)
-end
 
 --
 -- sendKey
@@ -182,6 +172,37 @@ function obj.enableKeyBindings ()
     obj.enabled = true
     obj.runHooks(obj.keybindsEnabledHook)
   end
+end
+
+-- filters
+
+obj.applicationFilterValue = false
+obj.inputMethodFilterValue = false
+
+local function updateEnabledState ()
+  if obj.applicationFilterValue or obj.inputMethodFilterValue then
+    obj.disableKeyBindings()
+  else
+    obj.enableKeyBindings()
+  end
+end
+
+function obj.setApplicationFilter (fn)
+  local wrappedFn = function (app)
+    obj.applicationFilterValue = fn(app)
+    updateEnabledState()
+  end
+  wrappedFn(hs.application.frontmostApplication():title())
+  obj.addHook(obj.afterFocusChangeHook, wrappedFn)
+end
+
+function obj.setInputMethodFilter (fn)
+  local wrappedFn = function (method)
+    obj.inputMethodFilterValue = fn(method)
+    updateEnabledState()
+  end
+  wrappedFn(hs.keycodes.currentMethod())
+  obj.addHook(obj.afterInputMethodChangeHook, wrappedFn)
 end
 
 -- digit argument
