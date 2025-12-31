@@ -122,9 +122,13 @@ end
 obj.preCommandHook = {}
 obj.postCommandHook = {}
 
-obj.pendingDigitArgument = 0
-
 obj.enabled = true
+
+local nextDigitArgument = 0
+
+function obj.setDigitArgument (val)
+  nextDigitArgument = val
+end
 
 obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
   {hs.eventtap.event.types.keyDown},
@@ -143,8 +147,8 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
     end
     local repeated = evt:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat)
     if repeated == 0 or entry[2] then
-      local arg = obj.pendingDigitArgument
-      obj.pendingDigitArgument = 0
+      local arg = nextDigitArgument
+      nextDigitArgument = 0
       obj.runHooks(obj.preCommandHook)
       entry[1](arg, evt:getCharacters(true))
       obj.runHooks(obj.postCommandHook)
@@ -189,16 +193,17 @@ obj.addHook(obj.afterChangeHook, maybeResetMark)
 --
 
 local function maybeClearDigitArgument ()
-  if obj.pendingDigitArgument > 0 then
-    obj.pendingDigitArgument = 0
+  if nextDigitArgument > 0 then
+    nextDigitArgument = 0
     hs.alert("Argument cleared")
   end
 end
 
 function obj.cmd.digitArgument (arg, key)
   local digit = tonumber(key)
-  obj.pendingDigitArgument = arg * 10 + digit
-  hs.alert(obj.pendingDigitArgument)
+  local val = arg * 10 + digit
+  obj.setDigitArgument(val)
+  hs.alert(val)
 end
 
 obj.addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
@@ -210,7 +215,7 @@ obj.addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
 obj.cxMap = hs.hotkey.modal.new()
 
 function obj.cmd.cx (arg)
-  obj.pendingDigitArgument = arg
+  obj.setDigitArgument(arg)
   obj.enableOverlayMap(obj.cxMap)
   hs.alert('C-x')
 end
