@@ -17,7 +17,7 @@ $ cd ~/.hammerspoon/Spoons/
 $ git clone https://github.com/zk-phi/EWOM.spoon.git
 ```
 
-3. Load EWOM in your `~/.hammerspoon/init.lua`
+3. Load and initialize EWOM in your `~/.hammerspoon/init.lua`
 
 Sample:
 
