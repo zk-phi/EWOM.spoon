@@ -54,7 +54,7 @@ obj.beforeSendHook = {}
 
 local SYNTHETIC_EVENT_SIGNATURE = 55555
 
-local function sendSynteticEvent (evt, delay)
+local function sendSyntheticEvent (evt, delay)
   evt:setProperty(hs.eventtap.event.properties.eventSourceUserData, SYNTHETIC_EVENT_SIGNATURE)
   obj.runHooks(obj.beforeSendHook, evt)
   if delay and delay > 0 then
@@ -72,8 +72,8 @@ end
 -- Like fs.eventtap.keyStroke but faster
 -- https://github.com/Hammerspoon/hammerspoon/issues/1082
 function obj.sendKey (mod, char)
-  sendSynteticEvent(hs.eventtap.event.newKeyEvent(mod, char, true))
-  sendSynteticEvent(hs.eventtap.event.newKeyEvent(mod, char, false))
+  sendSyntheticEvent(hs.eventtap.event.newKeyEvent(mod, char, true))
+  sendSyntheticEvent(hs.eventtap.event.newKeyEvent(mod, char, false))
 end
 
 --
