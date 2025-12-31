@@ -363,7 +363,7 @@ function obj.cmd.kmacroCall (arg)
   end
   for i = 1, math.max(1, arg) do
     for j = 1, #obj.kmacro do
-      sendSynteticEvent(obj.kmacro[j], 0.1 * ((i - 1) * #obj.kmacro + j))
+      sendSyntheticEvent(obj.kmacro[j], 0.1 * ((i - 1) * #obj.kmacro + j))
     end
   end
 end
