@@ -18,11 +18,6 @@ obj.preCommandHook = {}
 obj.postCommandHook = {}
 obj.afterChangeHook = {}
 
-obj.beforeSendHook = {}
-obj.afterSendHook = {}
-
-obj.afterFocusChangeHook = {}
-
 function obj:addHook (hook, fn)
   hook[#hook + 1] = fn
 end
@@ -33,14 +28,11 @@ function obj:runHooks (hook, arg)
   end
 end
 
--- Like fs.eventtap.keyStroke but faster
--- https://github.com/Hammerspoon/hammerspoon/issues/1082
-function sendKey (mod, char)
-  obj:runHooks(obj.beforeSendHook)
-  hs.eventtap.event.newKeyEvent(mod, char, true):post()
-  hs.eventtap.event.newKeyEvent(mod, char, false):post()
-  obj:runHooks(obj.afterSendHook)
-end
+--
+-- afterFocusChangeHook
+--
+
+obj.afterFocusChangeHook = {}
 
 -- We need to bind allocated watcher unless otherwise it will be garbage-collected.
 -- https://github.com/Hammerspoon/hammerspoon/issues/681#issuecomment-178420569
@@ -54,66 +46,110 @@ obj.watchers[#obj.watchers + 1] = hs.application.watcher.new(
 ):start()
 
 --
+-- sendKey
+--
+
+obj.lastSentKey = nil
+
+obj.beforeSendHook = {}
+obj.afterSendHook = {}
+
+-- Like fs.eventtap.keyStroke but faster
+-- https://github.com/Hammerspoon/hammerspoon/issues/1082
+function sendKey (mod, char)
+  obj:runHooks(obj.beforeSendHook)
+  obj.lastSentKey = { mod, char }
+  hs.eventtap.event.newKeyEvent(mod, char, true):post()
+  hs.eventtap.event.newKeyEvent(mod, char, false):post()
+  obj:runHooks(obj.afterSendHook)
+end
+
+--
 -- Keymap internals
 --
 
-obj.globalMap = hs.hotkey.modal.new()
-obj.temporaryMap = nil
-
-function obj:bindKey (map, mod, char, fn, repeated)
-  map:bind(mod, char, fn, nil, repeated and fn or nil)
-end
-
-local function maybeExitTemporaryMap ()
-  if obj.temporaryMap then
-    obj.temporaryMap:exit()
-    obj.temporaryMap = nil
-    hs.alert("Prefix cleared")
-  end
-end
-
-local function disableAllBindings ()
-  maybeExitTemporaryMap()
-  obj.globalMap:exit()
-end
-
-local function enableGlobalMap ()
-  maybeExitTemporaryMap()
-  obj.globalMap:enter()
-end
-
-local function enableTemporaryMap (map)
-  disableAllBindings()
-  map:enter()
-  obj.temporaryMap = map
-end
-
-function obj:setFilter (filterFn)
-  obj:addHook(
-    obj.afterFocusChangeHook,
-    function (app)
-      if filterFn(app) then
-        disableAllBindings()
-      else
-        enableGlobalMap()
-      end
-    end
-  )
-end
-
---
--- lastKeyDown
---
+-- hs.hotkey can be fired with synthetic keyboard event too,
+-- which easily leads to infinite recursion. so implement by our own
+-- https://github.com/Hammerspoon/hammerspoon/issues/1230
 
 obj.lastKeyDown = nil
 
+obj.enabled = true
+
+obj.globalMap = {}
+obj.overlayMap = nil
+
+obj.MODFLAGS =
+  hs.eventtap.event.rawFlagMasks.alternate |
+  hs.eventtap.event.rawFlagMasks.command |
+  hs.eventtap.event.rawFlagMasks.control |
+  hs.eventtap.event.rawFlagMasks.shift |
+  hs.eventtap.event.rawFlagMasks.deviceRightAlternate |
+  hs.eventtap.event.rawFlagMasks.deviceRightCommand |
+  hs.eventtap.event.rawFlagMasks.deviceRightControl |
+  hs.eventtap.event.rawFlagMasks.deviceRightShift
+
+function obj:defineKey (map, mods, char, fn, repeatable)
+  local e = hs.eventtap.event.newKeyEvent(mods, char, true)
+  local code = e:getKeyCode()
+  local flags = e:rawFlags() & obj.MODFLAGS
+  if not map[code] then
+    map[code] = {}
+  end
+  map[code][flags] = { fn, repeatable }
+end
+
+local function lookupKey (map, evt)
+  local flagsMap = map and map[evt:getKeyCode()]
+  return flagsMap and flagsMap[evt:rawFlags() & obj.MODFLAGS]
+end
+
 obj.watchers[#obj.watchers + 1] = hs.eventtap.new(
-  { hs.eventtap.event.types.keyDown },
+  {hs.eventtap.event.types.keyDown},
   function (evt)
     obj.lastKeyDown = evt:getCharacters(true)
-    return false
+    if not obj.enabled then
+      return false
+    end
+    -- skip synthetic events
+    local source = evt:getProperty(hs.eventtap.event.properties.eventSourceUnixProcessID)
+    if source > 0 then
+      return false
+    end
+    local entry = lookupKey(obj.overlayMap, evt) or lookupKey(obj.globalMap, evt)
+    if not entry then
+      return false
+    end
+    local repeated = evt:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat)
+    if repeated == 0 or entry[2] then
+      entry[1]()
+    end
+    return true
   end
 ):start()
+
+function obj:maybeDisableOverlayMap ()
+  if obj.overlayMap then
+    obj.overlayMap = nil
+    -- hs.alert("Prefix cleared")
+  end
+end
+
+function obj:enableOverlayMap (map)
+  obj:maybeDisableOverlayMap()
+  obj.overlayMap = map
+end
+
+function obj:disableKeyBindings ()
+  obj.enabled = false
+end
+
+function obj:enableKeyBindings ()
+  obj.enabled = true
+end
+
+obj:addHook(obj.afterFocusChangeHook, obj.maybeDisableOverlayMap)
+obj:addHook(obj.postCommandHook, obj.maybeDisableOverlayMap)
 
 --
 -- Mark
@@ -128,9 +164,7 @@ local function maybeResetMark ()
   end
 end
 
--- auto-disable mark on focus-out
 obj:addHook(obj.afterFocusChangeHook, maybeResetMark)
--- auto-disable after change
 obj:addHook(obj.afterChangeHook, maybeResetMark)
 
 --
@@ -138,11 +172,10 @@ obj:addHook(obj.afterChangeHook, maybeResetMark)
 --
 
 obj.cxMap = hs.hotkey.modal.new()
-obj:addHook(obj.preCommandHook, enableGlobalMap)
 
 function obj:cx ()
   hs.alert("C-x")
-  enableTemporaryMap(obj.cxMap)
+  obj:enableOverlayMap(obj.cxMap)
 end
 
 --
@@ -167,6 +200,47 @@ function obj:digitArgument ()
 end
 
 --
+-- Keyboard macro
+--
+
+obj.kmacroRecording = false
+obj.kmacro = {}
+
+obj:addHook(
+  obj.afterSendHook,
+  function ()
+    if obj.kmacroRecording then
+      obj.kmacro[#obj.kmacro + 1] = obj.lastSentKey
+    end
+  end
+)
+
+function obj:kmacroStart ()
+  obj:runHooks(obj.preCommandHook)
+  obj.kmacroRecording = true
+  obj.kmacro = {}
+  hs.alert("Macro recording ...")
+  obj:runHooks(obj.postCommandHook)
+end
+
+function obj:kmacroEnd ()
+  obj:runHooks(obj.preCommandHook)
+  obj.kmacroRecording = false
+  hs.alert("Macro recorded")
+  obj:runHooks(obj.postCommandHook)
+end
+
+function obj:kmacroCall ()
+  obj:runHooks(obj.preCommandHook)
+  for i = 1, math.max(1, obj.digitArgumentValue) do
+    for j = 1, #obj.kmacro do
+      sendKey(obj.kmacro[j][1], obj.kmacro[j][2])
+    end
+  end
+  obj:runHooks(obj.postCommandHook)
+end
+
+--
 -- Commands
 --
 
@@ -183,6 +257,16 @@ function obj:keyboardQuit ()
     hs.alert("Mark disabled")
     obj.markActive = false
   end
+  obj:runHooks(obj.postCommandHook)
+end
+
+function obj:selfInsertCommand ()
+  obj:runHooks(obj.preCommandHook)
+  local ch = obj.lastKeyDown
+  for i = 1, math.max(1, obj.digitArgumentValue) do
+    sendKey({}, ch)
+  end
+  obj:runHooks(obj.afterChangeHook)
   obj:runHooks(obj.postCommandHook)
 end
 
