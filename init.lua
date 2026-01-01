@@ -142,14 +142,14 @@ local function lookupKey (map, evt)
 end
 
 local function lookupKeyDwim (evt)
-  local overlayEntry = lookupKey(obj.overlayMap, evt)
-  if overlayEntry then
-    if not obj.overlayMap.keep then
+  if obj.overlayMap then
+    local entry = lookupKey(obj.overlayMap, evt)
+    if (not entry) or (not obj.overlayMap.keep) then
       maybeDisableOverlayMap()
     end
-    return overlayEntry
+    return entry or obj.overlayMap.default
   end
-  return lookupKey(obj.globalMap, evt)
+  return lookupKey(obj.globalMap, evt) or obj.globalMap.default
 end
 
 obj.addHook(obj.afterFocusChangeHook, maybeDisableOverlayMap)
