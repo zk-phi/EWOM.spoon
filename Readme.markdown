@@ -1,5 +1,7 @@
 Emacs keybinds for Macintosh (including kmacro feature etc)
 
+![Macro example](./screencast.gif)
+
 WIP Lua alternative of EWOW https://github.com/zk-phi/ewow, but for Mac.
 
 # Installation
