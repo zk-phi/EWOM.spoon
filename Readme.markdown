@@ -42,6 +42,8 @@ EWOM.setInputMethodFilter(
 EWOM.registerDefaultKeymap()
 
 -- You may also remap some keybinds as you want
--- ↓ EWOM equivalent of (global-set-key (kbd "C--") 'undo)
+-- (global-set-key (kbd "C--") 'undo)
 EWOM.globalSetKey({ 'ctrl' }, '-', EWOM.cmd.undo)
+-- (global-set-key (kbd "C-x a" 'mark-whole-buffer))
+EWOM.defineKey(EWOM.cxMap, {}, 'a', EWOM.cmd.markWholeBuffer)
 ```
