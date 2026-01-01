@@ -8,7 +8,7 @@ local obj = {};
 --
 
 obj.name = 'EWOM Spoon'
-obj.version = '0.1'
+obj.version = '0.1.0'
 obj.author = 'zk-phi'
 obj.license = 'MIT'
 obj.homepage = 'https://github.com/zk-phi/dotfiles'
