@@ -618,13 +618,13 @@ end
 
 function obj.cmd.killLine ()
   obj.sendKey({ 'command', 'shift' }, 'right')
-  obj.sendKey({}, 'delete')
+  obj.sendKey({ 'command' }, 'x')
   obj.runHooks(obj.afterChangeHook)
 end
 
 function obj.cmd.killWord ()
   obj.sendKey({ 'option', 'shift' }, 'right')
-  obj.sendKey({}, 'delete')
+  obj.sendKey({ 'command' }, 'x')
   obj.runHooks(obj.afterChangeHook)
 end
 
