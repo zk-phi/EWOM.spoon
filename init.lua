@@ -255,7 +255,7 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
       return false
     end
     local entry = lookupKeyDwim(evt)
-    -- No hotkey entry found -> passthrough the event
+    -- No hotkey entry found -> passthrough the event (unless explicitly ignored)
     if not entry then
       obj.runHooks(obj.beforeSendHook, evt)
       obj.lastCommand = nil
