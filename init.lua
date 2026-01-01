@@ -403,7 +403,7 @@ function obj.cmd.kmacroEndAndCallMacro (arg)
   obj.cmd.kmacroEndMacro()
   for i = 1, math.max(1, arg) do
     for j = 1, #obj.kmacro do
-      sendSyntheticEvent(obj.kmacro[j], 0.1 * ((i - 1) * #obj.kmacro + j))
+      sendSyntheticEvent(obj.kmacro[j], 0.05 * ((i - 1) * #obj.kmacro + j))
     end
   end
 end
