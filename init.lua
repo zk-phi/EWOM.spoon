@@ -124,7 +124,7 @@ function obj.globalSetKey (mods, char, fn, repeatable)
   obj.defineKey(obj.globalMap, mods, char, fn, repeatable)
 end
 
-local function maybeDisableOverlayMap (silent)
+local function maybeDisableOverlayMap ()
   if obj.overlayMap then
     obj.overlayMap = nil
     if not silent then
@@ -145,7 +145,7 @@ end
 
 local function lookupKeyDwim (evt)
   local entry = lookupKey(obj.overlayMap, evt) or lookupKey(obj.globalMap, evt)
-  maybeDisableOverlayMap(entry)
+  maybeDisableOverlayMap()
   return entry
 end
 
