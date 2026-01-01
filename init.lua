@@ -880,7 +880,7 @@ function obj.cmd.writeFile ()
   obj.sendKey({ 'cmd', 'shift' }, 's')
 end
 
-function obj.cmd.saveBuffersKillTerminal ()
+function obj.cmd.killApp ()
   obj.sendKey({ 'cmd' }, 'q')
 end
 
@@ -918,15 +918,15 @@ function obj.cmd.cxt (arg)
   hs.alert('C-x t')
 end
 
-function obj.registerDefaultKeymap ()
-  -- Reference: `emacs -Q` then `M-x describe-keymap global-map`
+-- Reference: `emacs -Q` then `M-x describe-keymap global-map`
 
-  -- Unmodified keycodes: non-ASCII chars and Tab
-  -- https://www.hammerspoon.org/docs/hs.keycodes.html#map
-  -- Tab, Return, Delete, ForwardDelete,
-  -- F1-F20, Numpad, Escape, CapsLock,
-  -- Home, PageUp, PageDown, End, Left, Right, Down, Up
+-- Unmodified keycodes: non-ASCII chars and Tab
+-- https://www.hammerspoon.org/docs/hs.keycodes.html#map
+-- Tab, Return, Delete, ForwardDelete,
+-- F1-F20, Numpad, Escape, CapsLock,
+-- Home, PageUp, PageDown, End, Left, Right, Down, Up
 
+function obj.registerBaseKeymap ()
   -- Plain
   obj.globalSetKey({}, '`', obj.cmd.selfInsertCommand, true)
   obj.globalSetKey({}, '1', obj.cmd.selfInsertCommand, true)
@@ -1025,6 +1025,12 @@ function obj.registerDefaultKeymap ()
   obj.globalSetKey(S_, ',', obj.cmd.selfInsertCommand, true)
   obj.globalSetKey(S_, '.', obj.cmd.selfInsertCommand, true)
   obj.globalSetKey(S_, '/', obj.cmd.selfInsertCommand, true)
+end
+
+function obj.registerDefaultKeymap ()
+  obj.registerBaseKeymap()
+
+  -- S-*
   obj.globalSetKey(S_, 'space', obj.cmd.ignore)
 
   -- C-*
@@ -1402,7 +1408,7 @@ function obj.registerDefaultKeymap ()
   obj.defineKey(obj.cxMap, C_, ';', obj.cmd.unsupported('commentLine'))
   obj.defineKey(obj.cxMap, C_, 'z', obj.cmd.suspendFrame)
   obj.defineKey(obj.cxMap, C_, 'x', obj.cmd.unsupported('exchangePointAndMark'))
-  obj.defineKey(obj.cxMap, C_, 'c', obj.cmd.restricted('saveBuffersKillTerminal'))
+  obj.defineKey(obj.cxMap, C_, 'c', obj.cmd.restricted('killApp'))
   obj.defineKey(obj.cxMap, C_, 'v', obj.cmd.spotlight) -- find-alternate-file
   obj.defineKey(obj.cxMap, C_, 'b', obj.cmd.unsupported('listBuffers'))
   obj.defineKey(obj.cxMap, C_, 'n', obj.cmd.unsupported('setGoalColumn'))
