@@ -317,7 +317,7 @@ end
 
 function obj.cmd.restricted (cmdName)
   return function ()
-    hs.alert('"' .. cmdName .. '" is restricted in this keymap')
+    hs.alert('"' .. cmdName .. '" is not bound by default')
   end
 end
 
