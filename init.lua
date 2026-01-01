@@ -144,9 +144,14 @@ local function lookupKey (map, evt)
 end
 
 local function lookupKeyDwim (evt)
-  local entry = lookupKey(obj.overlayMap, evt) or lookupKey(obj.globalMap, evt)
-  maybeDisableOverlayMap()
-  return entry
+  local overlayEntry = lookupKey(obj.overlayMap, evt)
+  if overlayEntry then
+    if not obj.overlayMap.keep then
+      maybeDisableOverlayMap()
+    end
+    return overlayEntry
+  end
+  return lookupKey(obj.globalMap, evt)
 end
 
 obj.addHook(obj.afterFocusChangeHook, maybeDisableOverlayMap)
@@ -302,9 +307,13 @@ function obj.cmd.digitArgument (arg, evt)
 end
 
 function obj.cmd.keyboardQuit ()
-  -- Disable mark (note that arg and overlayMap are disabled automatically)
+  -- Disable mark (note that arg is consumed automatically)
   if obj.markActive then
     obj.markActive = false
+  end
+  -- Disable overlayMap
+  if obj.overlayMap then
+    maybeDisableOverlayMap()
   end
   -- Tap twice to send ESC
   if obj.lastCommand == obj.cmd.keyboardQuit then
