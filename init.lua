@@ -127,9 +127,7 @@ end
 local function maybeDisableOverlayMap ()
   if obj.overlayMap then
     obj.overlayMap = nil
-    if not silent then
-      hs.alert('Prefix cleared')
-    end
+    hs.alert('Prefix cleared')
   end
 end
 
