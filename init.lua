@@ -323,7 +323,7 @@ end
 
 function obj.cmd.unsupported (cmdName)
   return function ()
-    hs.alert('"' .. cmdName .. '" is unsupported for now')
+    hs.alert('"' .. cmdName .. '" is unsupported')
   end
 end
 
