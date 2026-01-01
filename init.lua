@@ -161,8 +161,6 @@ obj.keybindsDisabledHook = {}
 obj.keybindsEnabledHook = {}
 obj.enabled = true
 
-obj.lastCommand = nil
-
 function obj.disableKeyBindings ()
   if obj.enabled then
     obj.enabled = false
@@ -227,6 +225,9 @@ obj.addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
 
 -- the event loop
 
+obj.lastCommand = nil
+obj.lastEvent = nil
+
 obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
   {
     hs.eventtap.event.types.keyDown,
@@ -247,6 +248,7 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
     if not (evt:getType() == hs.eventtap.event.types.keyDown) then
       obj.runHooks(obj.beforeSendHook, evt)
       obj.lastCommand = nil
+      obj.lastEvent = evt
       return false
     end
     local entry = lookupKeyDwim(evt)
@@ -254,6 +256,7 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
     if not entry then
       obj.runHooks(obj.beforeSendHook, evt)
       obj.lastCommand = nil
+      obj.lastEvent = evt
       return false
     end
     local repeated = evt:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat)
@@ -262,6 +265,7 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
       nextDigitArgument = 0
       entry[1](arg, evt)
       obj.lastCommand = entry[1]
+      obj.lastEvent = evt
     end
     return true
   end
