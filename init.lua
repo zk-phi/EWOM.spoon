@@ -336,6 +336,18 @@ function obj.cmd.keyboardQuit ()
   end
 end
 
+function obj.cmd.remap (mod, char)
+  return function ()
+    obj.sendKey(mod, char)
+  end
+end
+
+function obj.cmd.launch (app)
+  return function ()
+    hs.application.open(app)
+  end
+end
+
 function obj.cmd.restricted (cmdName)
   return function ()
     hs.alert('"' .. cmdName .. '" is not bound by default')
@@ -854,14 +866,6 @@ function obj.cmd.spotlight ()
   obj.sendKey({ 'command' }, 'space')
 end
 
-function obj.cmd.finder ()
-  hs.application.open('Finder')
-end
-
-function obj.cmd.mail ()
-  hs.application.open('Mail')
-end
-
 function obj.cmd.toggleInputMethod ()
   if hs.keycodes.currentMethod() == nil then
     -- kana key
@@ -1358,7 +1362,7 @@ function obj.registerDefaultKeymap ()
   obj.defineKey(obj.cxMap, {}, ']', obj.cmd.unsupported('forwardPage'))
   obj.defineKey(obj.cxMap, {}, 'a', obj.cmd.unsupported('abbrev'))
   obj.defineKey(obj.cxMap, {}, 's', obj.cmd.unsupported('saveSomeBuffers'))
-  obj.defineKey(obj.cxMap, {}, 'd', obj.cmd.finder)
+  obj.defineKey(obj.cxMap, {}, 'd', obj.cmd.launch('Finder'))
   obj.defineKey(obj.cxMap, {}, 'f', obj.cmd.unsupported('setFillColumn'))
   obj.defineKey(obj.cxMap, {}, 'h', obj.cmd.markWholeBuffer)
   obj.defineKey(obj.cxMap, {}, 'k', obj.cmd.tabClose) -- kill-buffer
@@ -1371,7 +1375,7 @@ function obj.registerDefaultKeymap ()
   obj.defineKey(obj.cxMap, {}, 'v', obj.cmd.unsupported('vc'))
   obj.defineKey(obj.cxMap, {}, 'b', obj.cmd.unsupported('switchToBuffer'))
   obj.defineKey(obj.cxMap, {}, 'n', obj.cmd.unsupported('narrowing'))
-  obj.defineKey(obj.cxMap, {}, 'm', obj.cmd.mail) -- compose-mail
+  obj.defineKey(obj.cxMap, {}, 'm', obj.cmd.launch('Mail')) -- compose-mail
   obj.defineKey(obj.cxMap, {}, '.', obj.cmd.unsupported('setFillPrefix'))
   obj.defineKey(obj.cxMap, {}, 'space', obj.cmd.unsupported('rectangleMarkMode'))
 
@@ -1402,7 +1406,7 @@ function obj.registerDefaultKeymap ()
   obj.defineKey(obj.cxMap, C_, 's', obj.cmd.saveBuffer)
   obj.defineKey(obj.cxMap, C_, 'd', obj.cmd.spotlight) -- list-directory
   obj.defineKey(obj.cxMap, C_, 'f', obj.cmd.spotlight) -- find-file
-  obj.defineKey(obj.cxMap, C_, 'j', obj.cmd.finder) -- dired-jump
+  obj.defineKey(obj.cxMap, C_, 'j', obj.cmd.launch('Finder')) -- dired-jump
   obj.defineKey(obj.cxMap, C_, 'k', obj.cmd.unsupported('C-x C-k *'))
   obj.defineKey(obj.cxMap, C_, 'l', obj.cmd.downcaseRegion)
   obj.defineKey(obj.cxMap, C_, ';', obj.cmd.unsupported('commentLine'))
@@ -1447,7 +1451,7 @@ function obj.registerDefaultKeymap ()
   obj.defineKey(obj.cxtMap, {}, 'u', obj.cmd.unsupported('tabUndo'))
   obj.defineKey(obj.cxtMap, {}, 'o', obj.cmd.tabNext)
   obj.defineKey(obj.cxtMap, {}, 'p', obj.cmd.unsupported('projectOtherTab'))
-  obj.defineKey(obj.cxtMap, {}, 'd', obj.cmd.finder) -- dired-other-tab
+  obj.defineKey(obj.cxtMap, {}, 'd', obj.cmd.launch('Finder')) -- dired-other-tab
   obj.defineKey(obj.cxtMap, {}, 'f', obj.cmd.spotlight) -- find-file-other-tab
   obj.defineKey(obj.cxtMap, {}, 'b', obj.cmd.unsupported('switchToBufferOtherTab'))
   obj.defineKey(obj.cxtMap, {}, 'n', obj.cmd.unsupported('tabDuplicate'))
