@@ -7,7 +7,7 @@ local obj = {};
 -- Metadata
 --
 
-obj.name = 'EWOM Spoon'
+obj.name = 'EWOM spoon -- Emacs-Way of Operating Macintosh'
 obj.version = '0.1.0'
 obj.author = 'zk-phi'
 obj.license = 'MIT'
@@ -80,7 +80,7 @@ obj.beforeSendHook = {}
 
 local SYNTHETIC_EVENT_SIGNATURE = 55555
 
-local function sendSyntheticEvent (evt, delay)
+function obj.sendSyntheticEvent (evt, delay)
   evt:setProperty(
     hs.eventtap.event.properties.eventSourceUserData,
     SYNTHETIC_EVENT_SIGNATURE
@@ -101,8 +101,8 @@ end
 -- Like fs.eventtap.keyStroke but faster
 -- https://github.com/Hammerspoon/hammerspoon/issues/1082
 function obj.sendKey (mod, char)
-  sendSyntheticEvent(hs.eventtap.event.newKeyEvent(mod, char, true))
-  sendSyntheticEvent(hs.eventtap.event.newKeyEvent(mod, char, false))
+  obj.sendSyntheticEvent(hs.eventtap.event.newKeyEvent(mod, char, true))
+  obj.sendSyntheticEvent(hs.eventtap.event.newKeyEvent(mod, char, false))
 end
 
 --
@@ -299,7 +299,7 @@ obj.afterChangeHook = {}
 
 function obj.cmd.selfInsertCommand (arg, evt)
   for i = 1, math.max(1, arg) do
-    sendSyntheticEvent(evt)
+    obj.sendSyntheticEvent(evt)
   end
   obj.runHooks(obj.afterChangeHook)
 end
@@ -307,7 +307,7 @@ end
 function obj.cmd.selfSendCommand (arg, evt)
   -- Like selfInsertCommand, but does not invoke afterChangeHook
   for i = 1, math.max(1, arg) do
-    sendSyntheticEvent(evt)
+    obj.sendSyntheticEvent(evt)
   end
 end
 
@@ -415,7 +415,7 @@ function obj.cmd.kmacroEndAndCallMacro (arg)
   obj.cmd.kmacroEndMacro()
   for i = 1, math.max(1, arg) do
     for j = 1, #obj.kmacro do
-      sendSyntheticEvent(obj.kmacro[j], 0.05 * ((i - 1) * #obj.kmacro + j))
+      obj.sendSyntheticEvent(obj.kmacro[j], 0.05 * ((i - 1) * #obj.kmacro + j))
     end
   end
 end
@@ -890,7 +890,7 @@ end
 
 function obj.cmd.repeatLastCommand (arg)
   if not obj.lastCommand then
-    sendSyntheticEvent(obj.lastEvent:copy())
+    obj.sendSyntheticEvent(obj.lastEvent:copy())
   else
     obj.lastCommand(arg, obj.lastEvent)
   end
