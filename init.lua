@@ -26,6 +26,23 @@ local C_M_ = { 'ctrl', 'command' }
 local C_M_S_ = { 'ctrl', 'command', 'shift' }
 
 --
+-- Helpers
+--
+
+function obj.usePasteboard (cb)
+  hs.pasteboard.callbackWhenChanged(
+    function (success)
+      local content = success and hs.pasteboard.getContents()
+      if content then
+        cb(content)
+      else
+        hs.alert('Operation failed')
+      end
+    end
+  )
+end
+
+--
 -- Hooks
 --
 
@@ -711,10 +728,14 @@ end
 function obj.cmd.transposeChars (arg)
   obj.sendKey({ 'shift' }, 'left')
   obj.sendKey({ 'command' }, 'x')
-  for i = 1, math.max(1, arg) do
-    obj.sendKey({}, 'right')
-  end
-  obj.sendKey({ 'command' }, 'v')
+  obj.usePasteboard(
+    function ()
+      for i = 1, math.max(1, arg) do
+        obj.sendKey({}, 'right')
+      end
+      obj.sendKey({ 'command' }, 'v')
+    end
+  )
   obj.runHooks(obj.afterChangeHook)
 end
 
@@ -724,10 +745,14 @@ function obj.cmd.transposeWords (arg)
   obj.sendKey({ 'option' }, 'right')
   obj.sendKey({ 'option', 'shift' }, 'right')
   obj.sendKey({ 'command' }, 'x')
-  for i = 1, math.max(1, arg) do
-    obj.sendKey({ 'option' }, 'right')
-  end
-  obj.sendKey({ 'command' }, 'v')
+  obj.usePasteboard(
+    function ()
+      for i = 1, math.max(1, arg) do
+        obj.sendKey({ 'option' }, 'right')
+      end
+      obj.sendKey({ 'command' }, 'v')
+    end
+  )
   obj.runHooks(obj.afterChangeHook)
 end
 
@@ -741,9 +766,13 @@ function obj.cmd.transposeLines (arg)
   end
   obj.sendKey({ 'command', 'shift' }, 'left')
   obj.sendKey({ 'command' }, 'x')
-  obj.sendKey({}, 'down')
-  obj.sendKey({ 'command' }, 'left')
-  obj.sendKey({ 'command' }, 'v')
+  obj.usePasteboard(
+    function ()
+      obj.sendKey({}, 'down')
+      obj.sendKey({ 'command' }, 'left')
+      obj.sendKey({ 'command' }, 'v')
+    end
+  )
   obj.runHooks(obj.afterChangeHook)
 end
 
@@ -752,15 +781,9 @@ function obj.cmd.upcaseWord (arg)
     obj.sendKey({ 'option', 'shift' }, 'right')
   end
   obj.sendKey({ 'command' }, 'x')
-  hs.pasteboard.callbackWhenChanged(
-    function (success)
-      local content = success and hs.pasteboard.getContents()
-      if content then
-        hs.eventtap.keyStrokes(content:upper())
-      else
-        obj.sendKey({ 'command' }, 'v')
-        hs.alert('Operation failed')
-      end
+  obj.usePasteboard(
+    function (content)
+      hs.eventtap.keyStrokes(content:upper())
     end
   )
   obj.runHooks(obj.afterChangeHook)
@@ -771,15 +794,9 @@ function obj.cmd.downcaseWord (arg)
     obj.sendKey({ 'option', 'shift' }, 'right')
   end
   obj.sendKey({ 'command' }, 'x')
-  hs.pasteboard.callbackWhenChanged(
-    function (success)
-      local content = success and hs.pasteboard.getContents()
-      if content then
-        hs.eventtap.keyStrokes(content:lower())
-      else
-        obj.sendKey({ 'command' }, 'v')
-        hs.alert('Operation failed')
-      end
+  obj.usePasteboard(
+    function (content)
+      hs.eventtap.keyStrokes(content:lower())
     end
   )
   obj.runHooks(obj.afterChangeHook)
@@ -790,15 +807,9 @@ function obj.cmd.capitalizeWord (arg)
     obj.sendKey({ 'option', 'shift' }, 'right')
   end
   obj.sendKey({ 'command' }, 'x')
-  hs.pasteboard.callbackWhenChanged(
-    function (success)
-      local content = success and hs.pasteboard.getContents()
-      if content then
-        hs.eventtap.keyStrokes(content:sub(1, 1):upper() .. content:sub(2):lower())
-      else
-        obj.sendKey({ 'command' }, 'v')
-        hs.alert('Operation failed')
-      end
+  obj.usePasteboard(
+    function (content)
+      hs.eventtap.keyStrokes(content:sub(1, 1):upper() .. content:sub(2):lower())
     end
   )
   obj.runHooks(obj.afterChangeHook)
@@ -806,15 +817,9 @@ end
 
 function obj.cmd.downcaseRegion ()
   obj.sendKey({ 'command' }, 'x')
-  hs.pasteboard.callbackWhenChanged(
-    function (success)
-      local content = success and hs.pasteboard.getContents()
-      if content then
-        hs.eventtap.keyStrokes(content:lower())
-      else
-        obj.sendKey({ 'command' }, 'v')
-        hs.alert('Operation failed')
-      end
+  obj.usePasteboard(
+    function (content)
+      hs.eventtap.keyStrokes(content:lower())
     end
   )
   obj.runHooks(obj.afterChangeHook)
@@ -822,15 +827,9 @@ end
 
 function obj.cmd.upcaseRegion ()
   obj.sendKey({ 'command' }, 'x')
-  hs.pasteboard.callbackWhenChanged(
-    function (success)
-      local content = success and hs.pasteboard.getContents()
-      if content then
-        hs.eventtap.keyStrokes(content:upper())
-      else
-        obj.sendKey({ 'command' }, 'v')
-        hs.alert('Operation failed')
-      end
+  obj.usePasteboard(
+    function (content)
+      hs.eventtap.keyStrokes(content:upper())
     end
   )
   obj.runHooks(obj.afterChangeHook)
