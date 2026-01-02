@@ -259,6 +259,8 @@ obj.addHook(obj.afterFocusChangeHook, maybeClearDigitArgument)
 
 -- the event loop
 
+obj.preCommandHook = {}
+
 obj.lastCommand = nil
 obj.lastEvent = nil
 
@@ -288,6 +290,7 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
     local entry = lookupKeyDwim(evt)
     -- No hotkey entry found -> passthrough the event (unless explicitly ignored)
     if not entry then
+      obj.runHooks(obj.preCommandHook, evt)
       obj.runHooks(obj.beforeSendHook, evt)
       obj.lastCommand = nil
       obj.lastEvent = evt
@@ -295,6 +298,7 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
     end
     local repeated = evt:getProperty(hs.eventtap.event.properties.keyboardEventAutorepeat)
     if repeated == 0 or entry[2] then
+      obj.runHooks(obj.preCommandHook, evt)
       local arg = nextDigitArgument
       nextDigitArgument = 0
       entry[1](arg, evt)
