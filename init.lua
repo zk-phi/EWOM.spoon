@@ -408,20 +408,20 @@ obj.addHook(obj.afterChangeHook, maybeResetMark)
 -- Keyboard macro
 
 obj.kmacroRecording = false
-obj.kmacro = {}
+obj._kmacro = {}
 
 obj.addHook(
   obj.beforeSendHook,
   function (evt)
     if obj.kmacroRecording then
-      obj.kmacro[#obj.kmacro + 1] = evt:copy()
+      obj._kmacro[#obj._kmacro + 1] = evt:copy()
     end
   end
 )
 
 function obj.cmd.kmacroStartMacro ()
   obj.kmacroRecording = true
-  obj.kmacro = {}
+  obj._kmacro = {}
   hs.alert('Macro recording ...')
 end
 
@@ -435,8 +435,8 @@ end
 function obj.cmd.kmacroEndAndCallMacro (arg)
   obj.cmd.kmacroEndMacro()
   for i = 1, math.max(1, arg) do
-    for j = 1, #obj.kmacro do
-      obj.sendSyntheticEvent(obj.kmacro[j], 0.05 * ((i - 1) * #obj.kmacro + j))
+    for j = 1, #obj._kmacro do
+      obj.sendSyntheticEvent(obj._kmacro[j], 0.05 * ((i - 1) * #obj._kmacro + j))
     end
   end
 end
