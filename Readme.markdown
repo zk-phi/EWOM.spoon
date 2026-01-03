@@ -83,6 +83,7 @@ function killLineBackward ()
   EWOM.sendKey({ 'command' }, 'x')
   EWOM.runHooks(EWOM.afterChangeHook)
 end
+EWOM.globalSetKey({ 'ctrl', 'command' }, 'k', killLineBackward)
 ```
 
 Note that you should use `EWOM.sendKey` helper function to send inputs to the OS, so that `EWOM` can avoid undesired behaviors like infinite loops.
@@ -125,7 +126,7 @@ Note that hooks are just lists of functions, so you may create your own easily.
 ``` lua
 mySpecialHook = {}
 EWOM.addHook(mySpecialHook, mySpecialFunction)
-EWOM.runHooks(mySpecialHook)
+EWOM.runHooks(mySpecialHook, mySpecialArgument)
 ```
 
 ## Keymaps
