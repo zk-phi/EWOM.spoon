@@ -55,7 +55,7 @@ EWOM.defineKey(EWOM.cxMap, {}, 'a', EWOM.cmd.markWholeBuffer)
 
 # Advantages
 
-This spoon implements hotkey mechanism by its own, to break the limitations of `hs.hotkey`.
+This spoon implements hotkey mechanism by its own, to break the limitations of Hammerspoon's `hs.hotkey`.
 
 So that,
 
