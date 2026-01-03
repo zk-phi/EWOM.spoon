@@ -316,6 +316,27 @@ obj._watchers[#obj._watchers + 1] = hs.eventtap.new(
 obj.cmd = {}
 obj.afterChangeHook = {}
 
+-- Mark
+
+obj.markActive = false
+
+local function maybeResetMark ()
+  if obj.markActive then
+    hs.alert('Mark disabled')
+    obj.markActive = false
+  end
+end
+
+function obj.cmd.setMarkCommand ()
+  if not obj.markActive then
+    hs.alert('Mark enabled')
+    obj.markActive = true
+  end
+end
+
+obj.addHook(obj.afterFocusChangeHook, maybeResetMark)
+obj.addHook(obj.afterChangeHook, maybeResetMark)
+
 -- Basic commands
 
 function obj.cmd.selfInsertCommand (arg, evt)
@@ -340,14 +361,9 @@ function obj.cmd.digitArgument (arg, evt)
 end
 
 function obj.cmd.keyboardQuit ()
-  -- Disable mark (note that arg is consumed automatically)
-  if obj.markActive then
-    obj.markActive = false
-  end
-  -- Disable overlayMap
-  if obj.overlayMap then
-    maybeDisableOverlayMap()
-  end
+  -- Disable mark and overlay map (note that digit arg is consumed automatically)
+  maybeResetMark()
+  maybeDisableOverlayMap()
   -- Tap twice to send ESC
   if obj.lastCommand == obj.cmd.keyboardQuit then
     obj.sendKey({}, 'escape')
@@ -383,27 +399,6 @@ end
 
 function obj.cmd.ignore ()
 end
-
--- Mark
-
-obj.markActive = false
-
-local function maybeResetMark ()
-  if obj.markActive then
-    hs.alert('Mark disabled')
-    obj.markActive = false
-  end
-end
-
-function obj.cmd.setMarkCommand ()
-  if not obj.markActive then
-    hs.alert('Mark enabled')
-    obj.markActive = true
-  end
-end
-
-obj.addHook(obj.afterFocusChangeHook, maybeResetMark)
-obj.addHook(obj.afterChangeHook, maybeResetMark)
 
 -- Keyboard macro
 
