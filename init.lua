@@ -340,16 +340,20 @@ obj.addHook(obj.afterChangeHook, maybeResetMark)
 -- Basic commands
 
 function obj.cmd.selfInsertCommand (arg, evt)
+  local upEvent = evt:copy():setType(hs.eventtap.event.types.keyUp)
   for i = 1, math.max(1, arg) do
     obj.sendSyntheticEvent(evt)
+    obj.sendSyntheticEvent(upEvent)
   end
   obj.runHooks(obj.afterChangeHook)
 end
 
 function obj.cmd.selfSendCommand (arg, evt)
   -- Like selfInsertCommand, but does not invoke afterChangeHook
+  local upEvent = evt:copy():setType(hs.eventtap.event.types.keyUp)
   for i = 1, math.max(1, arg) do
     obj.sendSyntheticEvent(evt)
+    obj.sendSyntheticEvent(upEvent)
   end
 end
 
