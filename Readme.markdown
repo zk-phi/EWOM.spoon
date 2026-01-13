@@ -28,6 +28,9 @@ Sample `init.lua`:
 ``` lua
 local EWOM = hs.loadSpoon("EWOM")
 
+-- Make alert display smaller
+hs.alert.defaultStyle.textSize = 16
+
 -- Disable in some apps
 EWOM.setApplicationFilter(
   function (app)
