@@ -153,6 +153,9 @@ You may specify `keep = true` in addition, which works like `KEEP-PRED` argument
 ## Other helper functions and variables
 ### Functions
 
+- `EWOM.sendString(str, keycode)`
+  - Like `EWOM.sendKey`, but sends string `str` for key `keycode`, regardless of keyboard layout.
+
 - `EWOM.usePasteboard(cb)`
   - Wait the pasteboard to be updated, and call `cb` with its content
 

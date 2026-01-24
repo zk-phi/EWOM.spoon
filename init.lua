@@ -1,4 +1,4 @@
--- TODO: State indicators (see hs.canvas doc)
+-- TODO: State indicators (see hs.canvas doc and InputMethodIndicator.spoon)
 -- TODO: Kill-ring history (C-2 C-y / M-y)
 
 local obj = {};
@@ -115,11 +115,21 @@ local function eventIsSynthetic (evt)
   return val == SYNTHETIC_EVENT_SIGNATURE
 end
 
--- Like fs.eventtap.keyStroke but faster
+-- Like hs.eventtap.keyStroke but efficient and marked as synthetic
 -- https://github.com/Hammerspoon/hammerspoon/issues/1082
 function obj.sendKey (mod, char)
   obj.sendSyntheticEvent(hs.eventtap.event.newKeyEvent(mod, char, true))
   obj.sendSyntheticEvent(hs.eventtap.event.newKeyEvent(mod, char, false))
+end
+
+-- Like hs.eventtap.keyStrokes but marked as synthetic
+function obj.sendString (str, keycode)
+  local evt = hs.eventtap.event.newEvent()
+    :setType(hs.eventtap.event.types.keyDown)
+    :setKeyCode(keycode)
+    :setUnicodeString(str)
+  obj.sendSyntheticEvent(evt:copy())
+  obj.sendSyntheticEvent(evt:setType(hs.eventtap.event.types.keyUp))
 end
 
 --
@@ -340,21 +350,11 @@ obj.addHook(obj.afterChangeHook, maybeResetMark)
 -- Basic commands
 
 function obj.cmd.selfInsertCommand (arg, evt)
-  local upEvent = evt:copy():setType(hs.eventtap.event.types.keyUp)
+  local ch = evt:getCharacters()
   for i = 1, math.max(1, arg) do
-    obj.sendSyntheticEvent(evt)
-    obj.sendSyntheticEvent(upEvent)
+    obj.sendString(ch, evt:getKeyCode())
   end
   obj.runHooks(obj.afterChangeHook)
-end
-
-function obj.cmd.selfSendCommand (arg, evt)
-  -- Like selfInsertCommand, but does not invoke afterChangeHook
-  local upEvent = evt:copy():setType(hs.eventtap.event.types.keyUp)
-  for i = 1, math.max(1, arg) do
-    obj.sendSyntheticEvent(evt)
-    obj.sendSyntheticEvent(upEvent)
-  end
 end
 
 function obj.cmd.digitArgument (arg, evt)
