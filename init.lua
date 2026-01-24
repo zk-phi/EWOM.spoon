@@ -352,6 +352,11 @@ obj.addHook(obj.afterChangeHook, maybeResetMark)
 function obj.cmd.selfInsertCommand (arg, evt)
   local ch = evt:getCharacters()
   for i = 1, math.max(1, arg) do
+    -- Use sendString instead of sendKey here to workaround the keyboard-layout issue.
+    -- To reproduce the issue:
+    -- 0. use sendKey instead of sendString
+    -- 1. send `=` from an US keyboard where the internal keyboard is JIS-layouted
+    -- 2. obj.sendKey({}, '=') fails because there's no '=' key in JIS keyboards
     obj.sendString(ch, evt:getKeyCode())
   end
   obj.runHooks(obj.afterChangeHook)
