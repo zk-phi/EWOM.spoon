@@ -123,13 +123,15 @@ function obj.sendKey (mod, char)
 end
 
 -- Like hs.eventtap.keyStrokes but marked as synthetic
-function obj.sendString (str, keycode)
-  local evt = hs.eventtap.event.newEvent()
+function obj.sendString (str, evt)
+  local downEvt = hs.eventtap.event.newEvent()
     :setType(hs.eventtap.event.types.keyDown)
-    :setKeyCode(keycode)
     :setUnicodeString(str)
-  obj.sendSyntheticEvent(evt:copy())
-  obj.sendSyntheticEvent(evt:setType(hs.eventtap.event.types.keyUp))
+    :setKeyCode(evt:getKeyCode())
+    :rawFlags(evt:rawFlags())
+  local upEvt = downEvt:copy():setType(hs.eventtap.event.types.keyUp);
+  obj.sendSyntheticEvent(downEvt)
+  obj.sendSyntheticEvent(upEvt)
 end
 
 --
@@ -357,7 +359,7 @@ function obj.cmd.selfInsertCommand (arg, evt)
     -- 0. use sendKey instead of sendString
     -- 1. send `=` from an US keyboard where the internal keyboard is JIS-layouted
     -- 2. obj.sendKey({}, '=') fails because there's no '=' key in JIS keyboards
-    obj.sendString(ch, evt:getKeyCode())
+    obj.sendString(ch, evt)
   end
   obj.runHooks(obj.afterChangeHook)
 end
