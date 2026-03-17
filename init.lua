@@ -886,15 +886,15 @@ function obj.cmd.toggleInputMethod ()
 end
 
 function obj.cmd.saveBuffer ()
-  obj.sendKey({ 'cmd' }, 's')
+  obj.sendKey({ 'command' }, 's')
 end
 
 function obj.cmd.writeFile ()
-  obj.sendKey({ 'cmd', 'shift' }, 's')
+  obj.sendKey({ 'command', 'shift' }, 's')
 end
 
 function obj.cmd.killApp ()
-  obj.sendKey({ 'cmd' }, 'q')
+  obj.sendKey({ 'command' }, 'q')
 end
 
 function obj.cmd.repeatLastCommand (arg)
