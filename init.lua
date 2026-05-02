@@ -357,7 +357,7 @@ function obj.cmd.selfInsertCommand (arg, evt)
     -- Use sendString instead of sendKey here to workaround the keyboard-layout issue.
     -- To reproduce the issue:
     -- 0. use sendKey instead of sendString
-    -- 1. send `=` from an US keyboard where the internal keyboard is JIS-layouted
+    -- 1. type `=` on an ANSI keyboard where the internal (built-in) keyboard is JIS-layouted
     -- 2. obj.sendKey({}, '=') fails because there's no '=' key in JIS keyboards
     obj.sendString(ch, evt)
   end
@@ -481,23 +481,6 @@ function obj.cmd.textScaleReset (arg)
   end
   maybeEnableTextScaleMap()
 end
-
-obj.defineKey(obj.textScaleMap, {}, '0', obj.cmd.textScaleReset)
-obj.defineKey(obj.textScaleMap, {}, '-', obj.cmd.textScaleDecrease)
-obj.defineKey(obj.textScaleMap, {}, '=', obj.cmd.textScaleIncrease)
-obj.defineKey(obj.textScaleMap, S_, '=', obj.cmd.textScaleIncrease)
-obj.defineKey(obj.textScaleMap, C_, '0', obj.cmd.textScaleReset)
-obj.defineKey(obj.textScaleMap, C_, '-', obj.cmd.textScaleDecrease)
-obj.defineKey(obj.textScaleMap, C_, '=', obj.cmd.textScaleIncrease)
-obj.defineKey(obj.textScaleMap, C_S_, '=', obj.cmd.textScaleIncrease)
-obj.defineKey(obj.textScaleMap, M_, '0', obj.cmd.textScaleReset)
-obj.defineKey(obj.textScaleMap, M_, '-', obj.cmd.textScaleDecrease)
-obj.defineKey(obj.textScaleMap, M_, '=', obj.cmd.textScaleIncrease)
-obj.defineKey(obj.textScaleMap, M_S_, '=', obj.cmd.textScaleIncrease)
-obj.defineKey(obj.textScaleMap, C_M_, '0', obj.cmd.textScaleReset)
-obj.defineKey(obj.textScaleMap, C_M_, '-', obj.cmd.textScaleDecrease)
-obj.defineKey(obj.textScaleMap, C_M_, '=', obj.cmd.textScaleIncrease)
-obj.defineKey(obj.textScaleMap, C_M_S_, '=', obj.cmd.textScaleIncrease)
 
 -- Cursor
 
@@ -939,6 +922,7 @@ end
 -- F1-F20, Numpad, Escape, CapsLock,
 -- Home, PageUp, PageDown, End, Left, Right, Down, Up
 
+-- Base keymap for ANSI keyboards
 function obj.registerBaseKeymap ()
   -- Plain
   obj.globalSetKey({}, '`', obj.cmd.selfInsertCommand, true)
@@ -1040,6 +1024,7 @@ function obj.registerBaseKeymap ()
   obj.globalSetKey(S_, '/', obj.cmd.selfInsertCommand, true)
 end
 
+-- Default keymap for ANSI keyboards
 function obj.registerDefaultKeymap ()
   obj.registerBaseKeymap()
 
@@ -1476,6 +1461,24 @@ function obj.registerDefaultKeymap ()
   -- C-x t C-* (ignore by default)
   obj.defineKey(obj.cxtMap, C_, 'r', obj.cmd.spotlight) -- find-file-read-only-other-tab
   obj.defineKey(obj.cxtMap, C_, 'f', obj.cmd.spotlight) -- find-file-other-tab
+
+  -- Text-scale temporary map
+  obj.defineKey(obj.textScaleMap, {}, '0', obj.cmd.textScaleReset)
+  obj.defineKey(obj.textScaleMap, {}, '-', obj.cmd.textScaleDecrease)
+  obj.defineKey(obj.textScaleMap, {}, '=', obj.cmd.textScaleIncrease)
+  obj.defineKey(obj.textScaleMap, S_, '=', obj.cmd.textScaleIncrease)
+  obj.defineKey(obj.textScaleMap, C_, '0', obj.cmd.textScaleReset)
+  obj.defineKey(obj.textScaleMap, C_, '-', obj.cmd.textScaleDecrease)
+  obj.defineKey(obj.textScaleMap, C_, '=', obj.cmd.textScaleIncrease)
+  obj.defineKey(obj.textScaleMap, C_S_, '=', obj.cmd.textScaleIncrease)
+  obj.defineKey(obj.textScaleMap, M_, '0', obj.cmd.textScaleReset)
+  obj.defineKey(obj.textScaleMap, M_, '-', obj.cmd.textScaleDecrease)
+  obj.defineKey(obj.textScaleMap, M_, '=', obj.cmd.textScaleIncrease)
+  obj.defineKey(obj.textScaleMap, M_S_, '=', obj.cmd.textScaleIncrease)
+  obj.defineKey(obj.textScaleMap, C_M_, '0', obj.cmd.textScaleReset)
+  obj.defineKey(obj.textScaleMap, C_M_, '-', obj.cmd.textScaleDecrease)
+  obj.defineKey(obj.textScaleMap, C_M_, '=', obj.cmd.textScaleIncrease)
+  obj.defineKey(obj.textScaleMap, C_M_S_, '=', obj.cmd.textScaleIncrease)
 end
 
 return obj
